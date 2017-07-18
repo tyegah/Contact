@@ -7,3 +7,25 @@
 //
 
 import Foundation
+
+class ContactListPresenter {
+    private let coreDataManager:CoreDataManager
+    private var contactView: ContactListViewProtocol?
+    
+    init(coreDataManager:CoreDataManager) {
+        self.coreDataManager = coreDataManager
+    }
+    
+    func attachView(view:ContactListViewProtocol) {
+        contactView = view
+        contactView?.setupViewLayout()
+    }
+    
+    func detachView() {
+        contactView = nil
+    }
+    
+    func loadContacts() {
+        self.contactView?.showLoadingIndicator()
+    }
+}

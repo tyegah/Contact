@@ -36,14 +36,10 @@ class ContactListController: UITableViewController {
         tableView.sectionIndexColor = UIColor.black
         tableView.sectionIndexTrackingBackgroundColor = UIColor.clear
         tableView.backgroundColor = UIColor.white
-        if contacts == nil {
-            showEmptyView(UIImage(named:"empty_box")!, text: "Oops! It seems like you have no contacts yet.")
-        }
+//        if contacts == nil {
+//            showEmptyView(UIImage(named:"empty_box")!, text: "Oops! It seems like you have no contacts yet.")
+//        }
     }
-
-//    func showEmptyView() {
-//        
-//    }
     
     //Actions
     func showGroups() {
@@ -51,11 +47,13 @@ class ContactListController: UITableViewController {
     }
     
     func addContact() {
-        
+        let addeditVC = ContactAddEditController(style: .plain)
+        self.navigationController?.pushViewController(addeditVC, animated: true)
     }
     
     func showContactDetail() {
-        
+        let detailVC = ContactDetailController(style: .plain)
+        self.navigationController?.pushViewController(detailVC, animated: true)
     }
 }
 
@@ -66,17 +64,18 @@ extension ContactListController {
         if let count = indices?.count {
             return count
         }
-        return 0
+        return 1
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return getContactsForSection(section: section).count
+        return 1
+//        return getContactsForSection(section: section).count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! ContactCell
-        let contact = getContactsForSection(section: indexPath.section)[indexPath.row]
-        cell.setupView(contact: contact)
+//        let contact = getContactsForSection(section: indexPath.section)[indexPath.row]
+//        cell.setupView(contact: contact)
         return cell
     }
     
@@ -89,7 +88,7 @@ extension ContactListController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+        self.showContactDetail()
     }
 }
 

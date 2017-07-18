@@ -10,15 +10,15 @@ import Foundation
 import CoreData
 
 class CoreDataManager {
-    let context: NSManagedObjectContext
+    let persistentContainer:NSPersistentContainer
     
-    init(context:NSManagedObjectContext) {
-        self.context = context
+    init(persistentContainer:NSPersistentContainer) {
+        self.persistentContainer = persistentContainer
     }
     
     func allContacts() -> [Contact] {
         do {
-            let contacts = try self.context.fetch(NSFetchRequest(entityName: "Contact")) as! [Contact]
+            let contacts = try self.persistentContainer.viewContext.fetch(NSFetchRequest(entityName: "Contact")) as! [Contact]
             return contacts
             
         }
@@ -33,7 +33,7 @@ class CoreDataManager {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Contact")
         fetchRequest.predicate = NSPredicate(format: "id = %@", id)
         do {
-            let contacts = try context.fetch(fetchRequest) as? [Contact]
+            let contacts = try self.persistentContainer.viewContext.fetch(fetchRequest) as? [Contact]
             if let count = contacts?.count, count > 0 {
                 return contacts?[0]
             }
@@ -43,5 +43,19 @@ class CoreDataManager {
         }
         
         return nil
+    }
+    
+    func saveContext () {
+        let context = persistentContainer.viewContext
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                // Replace this implementation with code to handle the error appropriately.
+                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            }
+        }
     }
 }

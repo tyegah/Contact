@@ -25,7 +25,8 @@ class ContactDetailController: UITableViewController {
 
 extension ContactDetailController {
     func editContact() {
-        
+        let addeditVC = ContactAddEditController()
+        self.navigationController?.pushViewController(addeditVC, animated: true)
     }
 }
 
@@ -130,14 +131,6 @@ class HeaderView:UIView {
         return imageView
     }()
     
-    lazy var profileBackgroundView:UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.white
-        view.layer.masksToBounds = true
-        view.layer.cornerRadius = 54
-        return view
-    }()
-    
     lazy var nameLabel:UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
@@ -218,7 +211,7 @@ class HeaderView:UIView {
         gradient.colors = [topColor.cgColor, bottomColor.cgColor]
         self.layer.insertSublayer(gradient, at: 0)
         
-        addSubview(profileBackgroundView)
+        addSubview(profileImgView)
         addSubview(nameLabel)
         addSubview(messageButton)
         addSubview(callButton)
@@ -254,19 +247,16 @@ class HeaderView:UIView {
         addSubview(stackView)
         
         addConstraintsWithFormat(format: "H:|-44-[v0]-44-|", views: stackView)
-        addConstraintsWithFormat(format: "V:|-30-[v0(108)]-8-[v1]-12-[v2]", views: profileBackgroundView, nameLabel, stackView)
-        addConstraintsWithFormat(format: "H:[v0(108)]", views: profileBackgroundView)
+        addConstraintsWithFormat(format: "V:|-30-[v0(100)]-8-[v1]-12-[v2]", views: profileImgView, nameLabel, stackView)
+        addConstraintsWithFormat(format: "H:[v0(100)]", views: profileImgView)
         addConstraintsWithFormat(format: "H:|-20-[v0]-20-|", views: nameLabel)
         
-        addConstraint(NSLayoutConstraint(item: profileBackgroundView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
+        addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
         addConstraint(NSLayoutConstraint(item: nameLabel, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
         
-        profileBackgroundView.addSubview(profileImgView)
-        profileBackgroundView.addConstraintsWithFormat(format: "V:[v0(100)]", views: profileImgView)
-        profileBackgroundView.addConstraintsWithFormat(format: "H:[v0(100)]", views: profileImgView)
         profileImgView.image = UIImage(named: "missing")
-        profileBackgroundView.addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerY, relatedBy: .equal, toItem: profileBackgroundView, attribute: .centerY, multiplier: 1, constant: 0))
-        profileBackgroundView.addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerX, relatedBy: .equal, toItem: profileBackgroundView, attribute: .centerX, multiplier: 1, constant: 0))
+        addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: 0))
+        addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
         
     }
     

@@ -7,3 +7,13 @@
 //
 
 import Foundation
+
+protocol ContactListViewProtocol:ContactBaseProtocol {
+    func loadContacts(contacts:[Contact])
+    func setEmptyUsers()
+    
+    // actions
+    func showGroups()
+    func addContact()
+    func showDetailContact(contact:Contact)
+}

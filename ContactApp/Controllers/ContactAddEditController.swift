@@ -10,22 +10,47 @@ import UIKit
 
 class ContactAddEditController: UITableViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     let cellId = "AddEditCell"
+    let tableFields = ["First Name", "Last Name", "mobile", "email"]
+    var contact:Contact?
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationItem.hidesBackButton = true
+        let cancelBarButton = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(popViewController))
+        let saveBarButton = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(saveContact))
+        self.navigationItem.leftBarButtonItem = cancelBarButton
+        self.navigationItem.rightBarButtonItem = saveBarButton
+        tableView.register(AddEditCell.self, forCellReuseIdentifier: cellId)
+        tableView.separatorColor = UIColor.clear
+        tableView.tableFooterView = UIView()
+        tableView.sectionIndexBackgroundColor = Color.backgroundColor
     }
-
+    
+    //actions
+    func saveContact() {
+        if let _ = self.contact {
+            // Update contact
+        }
+        else {
+            // Add new contact
+        }
+    }
+    
+    func popViewController() {
+        self.navigationController?.popViewController(animated: true)
+    }
 }
 
 
 extension ContactAddEditController {
     // MARK: - Table view data source
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 0
+        return 1
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return 0
+        return 4
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -43,6 +68,7 @@ extension ContactAddEditController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! AddEditCell
+        cell.titleLabel.text = tableFields[indexPath.row]
         return cell
     }
 }
@@ -50,7 +76,7 @@ extension ContactAddEditController {
 class AddEditCell:DetailCell {
     fileprivate lazy var textField:UITextField = {
         let tf = UITextField()
-        tf.font = UIFont.systemFont(ofSize: 16)
+        tf.font = UIFont.systemFont(ofSize: 17)
         return tf
     }()
     
@@ -69,89 +95,29 @@ class AddEditCell:DetailCell {
 }
 
 class AddEditHeaderView:UIView {
-    lazy var profileImgView:CachedImageView = {
-        let imageView = CachedImageView(cornerRadius: 50, emptyImage: UIImage(named: "missing"))
-        imageView.shouldUseEmptyImage = true
+    lazy var imageBackgroundView:UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.clear
+        view.layer.masksToBounds = true
+        view.clipsToBounds = true
+        return view
+    }()
+    
+    lazy var profileImgView:UIImageView = {
+        let imageView = UIImageView(image:UIImage(named: "missing"))
+        imageView.layer.cornerRadius = 50
         imageView.contentMode = .scaleAspectFill
         imageView.layer.masksToBounds = true
         return imageView
     }()
     
-    lazy var profileBackgroundView:UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.white
-        view.layer.masksToBounds = true
-        view.layer.cornerRadius = 54
-        return view
-    }()
-    
-    lazy var nameLabel:UILabel = {
-        let label = UILabel()
-        label.numberOfLines = 0
-        label.text = "Test Name"
-        label.textAlignment = .center
-        label.font = UIFont.boldSystemFont(ofSize: 21)
-        return label
-    }()
-    
-    lazy var messageButton:UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "message"), for: .normal)
-        button.backgroundColor = UIColor.clear
-        return button
-    }()
-    
-    lazy var callButton:UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "call"), for: .normal)
-        button.backgroundColor = UIColor.clear
-        return button
-    }()
-    
-    lazy var emailButton:UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "email"), for: .normal)
-        button.backgroundColor = UIColor.clear
-        return button
-    }()
-    
-    lazy var favoriteButton:UIButton = {
-        let button = UIButton()
-        button.setImage(UIImage(named: "favorite"), for: .normal)
-        button.backgroundColor = UIColor.clear
-        return button
-    }()
-    
-    lazy var messageLabel:UILabel = {
-        let label = UILabel()
-        label.text = "message"
-        label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 10)
-        return label
-    }()
-    
-    lazy var callLabel:UILabel = {
-        let label = UILabel()
-        label.text = "call"
-        label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 10)
-        return label
-    }()
-    
-    lazy var emailLabel:UILabel = {
-        let label = UILabel()
-        label.text = "email"
-        label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 10)
-        return label
-    }()
-    
-    lazy var favoriteLabel:UILabel = {
-        let label = UILabel()
-        label.text = "favorite"
-        label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 10)
-        return label
+    lazy var cameraImgView:UIImageView = {
+        let imageView = UIImageView(image:UIImage(named: "camera"))
+        imageView.layer.cornerRadius = 20
+        imageView.backgroundColor = UIColor.white
+        imageView.contentMode = .scaleAspectFit
+        imageView.layer.masksToBounds = true
+        return imageView
     }()
     
     override init(frame: CGRect) {
@@ -164,56 +130,23 @@ class AddEditHeaderView:UIView {
         let bottomColor = UIColor(red: 223/255.0, green: 243.0/255.0, blue: 238.0/255.0, alpha: 1.0)
         gradient.colors = [topColor.cgColor, bottomColor.cgColor]
         self.layer.insertSublayer(gradient, at: 0)
+        addSubview(imageBackgroundView)
+        addConstraintsWithFormat(format: "H:[v0(100)]", views: imageBackgroundView)
+        addConstraintsWithFormat(format: "V:[v0(100)]", views: imageBackgroundView)
+        addConstraint(NSLayoutConstraint(item: imageBackgroundView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
+        addConstraint(NSLayoutConstraint(item: imageBackgroundView, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: 0))
+        imageBackgroundView.addSubview(profileImgView)
+        imageBackgroundView.addSubview(cameraImgView)
+        imageBackgroundView.addConstraintsWithFormat(format: "H:[v0(100)]", views: profileImgView)
+        imageBackgroundView.addConstraintsWithFormat(format: "V:[v0(100)]", views: profileImgView)
+        imageBackgroundView.addConstraintsWithFormat(format: "H:[v0(40)]|", views: cameraImgView)
+        imageBackgroundView.addConstraintsWithFormat(format: "V:[v0(40)]|", views: cameraImgView)
+        imageBackgroundView.addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerX, relatedBy: .equal, toItem: imageBackgroundView, attribute: .centerX, multiplier: 1, constant: 0))
+        imageBackgroundView.addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerY, relatedBy: .equal, toItem: imageBackgroundView, attribute: .centerY, multiplier: 1, constant: 0))
         
-        addSubview(profileBackgroundView)
-        addSubview(nameLabel)
-        addSubview(messageButton)
-        addSubview(callButton)
-        addSubview(emailLabel)
-        addSubview(emailButton)
-        addSubview(favoriteLabel)
-        addSubview(favoriteButton)
-        addSubview(callLabel)
-        addSubview(messageLabel)
+//        addConstraint(NSLayoutConstraint(item: cameraImgView, attribute: ., relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
+//        addConstraint(NSLayoutConstraint(item: cameraImgView, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: 0))
         
-        
-        let stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .horizontal
-        stackView.spacing = 10
-        stackView.alignment = .center
-        stackView.distribution = .equalCentering
-        stackView.backgroundColor = UIColor.red
-        stackView.clipsToBounds = true
-        
-        let buttonArray = [messageButton, callButton, emailButton, favoriteButton]
-        let labelArray = [messageLabel, callLabel, emailLabel, favoriteLabel]
-        for (index, button) in buttonArray.enumerated() {
-            let buttonContainerView = UIView(frame: CGRect(x: 0, y: 0, width: 60, height: 56))
-            buttonContainerView.addSubview(button)
-            buttonContainerView.addSubview(labelArray[index])
-            buttonContainerView.addConstraintsWithFormat(format: "V:|[v0(40)]-2-[v1]", views: button,  labelArray[index])
-            buttonContainerView.addConstraintsWithFormat(format: "H:|-5-[v0(40)]-5-|", views: button)
-            buttonContainerView.addConstraintsWithFormat(format: "H:|[v0]|", views: labelArray[index])
-            stackView.addArrangedSubview(buttonContainerView)
-        }
-        
-        addSubview(stackView)
-        
-        addConstraintsWithFormat(format: "H:|-44-[v0]-44-|", views: stackView)
-        addConstraintsWithFormat(format: "V:|-30-[v0(108)]-8-[v1]-12-[v2]", views: profileBackgroundView, nameLabel, stackView)
-        addConstraintsWithFormat(format: "H:[v0(108)]", views: profileBackgroundView)
-        addConstraintsWithFormat(format: "H:|-20-[v0]-20-|", views: nameLabel)
-        
-        addConstraint(NSLayoutConstraint(item: profileBackgroundView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
-        addConstraint(NSLayoutConstraint(item: nameLabel, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
-        
-        profileBackgroundView.addSubview(profileImgView)
-        profileBackgroundView.addConstraintsWithFormat(format: "V:[v0(100)]", views: profileImgView)
-        profileBackgroundView.addConstraintsWithFormat(format: "H:[v0(100)]", views: profileImgView)
-        profileImgView.image = UIImage(named: "missing")
-        profileBackgroundView.addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerY, relatedBy: .equal, toItem: profileBackgroundView, attribute: .centerY, multiplier: 1, constant: 0))
-        profileBackgroundView.addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerX, relatedBy: .equal, toItem: profileBackgroundView, attribute: .centerX, multiplier: 1, constant: 0))
         
     }
     

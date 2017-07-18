@@ -7,3 +7,9 @@
 //
 
 import Foundation
+
+protocol ContactBaseProtocol:NSObjectProtocol {
+    func setupViewLayout()
+    func showLoadingIndicator()
+    func hideLoadingIndicator()
+}

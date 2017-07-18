@@ -13,12 +13,13 @@ let syncQueue = DispatchQueue(label: "syncQueue", attributes: [])
 let syncGroup = DispatchGroup()
 
 struct ContactSynchronizer {
-    var managedObjectContext:NSManagedObjectContext
+//    var managedObjectContext:NSManagedObjectContext
+    let persistentContainer:NSPersistentContainer
     var coreDataManager:CoreDataManager
     
-    init(managedObjectContext:NSManagedObjectContext) {
-        self.managedObjectContext = managedObjectContext
-        self.coreDataManager = CoreDataManager(context: self.managedObjectContext)
+    init(persistentContainer:NSPersistentContainer) {
+        self.persistentContainer = persistentContainer
+        self.coreDataManager = CoreDataManager(persistentContainer: self.persistentContainer)
     }
     
     func sync(_ completion: @escaping () -> Void) {
@@ -29,7 +30,7 @@ struct ContactSynchronizer {
             self.uploadSync {
                 self.downloadSync {
                     UserDefaults.standard.set(Date.timeIntervalSinceReferenceDate, forKey: "lastSyncAttempt")
-                    try? self.managedObjectContext.save()
+                    try? self.coreDataManager.saveContext()
                     completion()
                     syncGroup.leave()
                 }
@@ -46,7 +47,7 @@ struct ContactSynchronizer {
             if let dicts = jsonDict {
                 var contacts = [Contact]()
                 dicts.forEach { dict in
-                    let contact = Contact(context: self.managedObjectContext)
+                    let contact = Contact(context: self.persistentContainer.viewContext)
                     contact.id = (dict["id"] as? Int32) ?? 0
                     contact.isFavorite = (dict["favorite"] as? NSNumber)?.boolValue ?? false
                     contact.firstName = dict["first_name"] as? String
@@ -59,7 +60,7 @@ struct ContactSynchronizer {
                     contact.updatedAt = (dict["updated_at"] as? String)?.convertToDate("yyyy-MM-ddThh:mm:ssZ") as NSDate?
                     contacts.append(contact)
                 }
-                try? self.managedObjectContext.save()
+                self.coreDataManager.saveContext()
                 
                 dicts.forEach { dict in
                     // check if server data is newer than local
@@ -92,7 +93,7 @@ struct ContactSynchronizer {
                                 local.createdAt = (dict["created_at"] as? String)?.convertToDate("yyyy-MM-ddThh:mm:ssZ") as NSDate?
                                 local.updatedAt = (dict["updated_at"] as? String)?.convertToDate("yyyy-MM-ddThh:mm:ssZ") as NSDate?
                             }
-                            try? self.managedObjectContext.save()
+                            self.coreDataManager.saveContext()
                         }
                     })
                 }
