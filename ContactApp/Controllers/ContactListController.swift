@@ -48,7 +48,8 @@ class ContactListController: UITableViewController {
     
     func addContact() {
         let addeditVC = ContactAddEditController(style: .plain)
-        self.navigationController?.pushViewController(addeditVC, animated: true)
+        let navVC = UINavigationController(rootViewController: addeditVC)
+        self.present(navVC, animated: true, completion: nil)
     }
     
     func showContactDetail() {

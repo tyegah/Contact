@@ -21,6 +21,21 @@ extension UIView {
         addConstraints(NSLayoutConstraint.constraints(withVisualFormat: format, options: NSLayoutFormatOptions(), metrics: nil, views: viewsDictionary))
     }
 }
+extension UIViewController {
+    func popupAlert(title: String?, message: String?, style:UIAlertControllerStyle, actionTitles:[String?], actions:[((UIAlertAction) -> Void)?]) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: style)
+        for (index, title) in actionTitles.enumerated() {
+            var actionStyle:UIAlertActionStyle = .default
+            if title?.lowercased() == "cancel" {
+                actionStyle = .cancel
+            }
+            
+            let action = UIAlertAction(title: title, style: actionStyle, handler: actions[index])
+            alert.addAction(action)
+        }
+        self.present(alert, animated: true, completion: nil)
+    }
+}
 
 extension UITableViewController {
     func showEmptyView(_ image:UIImage, text:String) {

@@ -10,6 +10,7 @@ import UIKit
 
 class ContactDetailController: UITableViewController {
     let cellId = "DetailCell"
+    var contact:Contact?
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -25,8 +26,10 @@ class ContactDetailController: UITableViewController {
 
 extension ContactDetailController {
     func editContact() {
-        let addeditVC = ContactAddEditController()
-        self.navigationController?.pushViewController(addeditVC, animated: true)
+        let addeditVC = ContactAddEditController(style: .plain)
+        addeditVC.contact = contact
+        let navVC = UINavigationController(rootViewController: addeditVC)
+        self.present(navVC, animated: true, completion: nil)
     }
 }
 

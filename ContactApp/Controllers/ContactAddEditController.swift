@@ -8,22 +8,41 @@
 
 import UIKit
 
-class ContactAddEditController: UITableViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+class ContactAddEditController: UITableViewController, UINavigationControllerDelegate {
     let cellId = "AddEditCell"
     let tableFields = ["First Name", "Last Name", "mobile", "email"]
-    var contact:Contact?
+    var contact:Contact? {
+        didSet {
+            if let _ = contact {
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        }
+    }
+    var imagePickerController:UIImagePickerController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.hidesBackButton = true
         let cancelBarButton = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(popViewController))
-        let saveBarButton = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(saveContact))
+        let saveBarButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(saveContact))
         self.navigationItem.leftBarButtonItem = cancelBarButton
         self.navigationItem.rightBarButtonItem = saveBarButton
         tableView.register(AddEditCell.self, forCellReuseIdentifier: cellId)
         tableView.separatorColor = UIColor.clear
         tableView.tableFooterView = UIView()
         tableView.sectionIndexBackgroundColor = Color.backgroundColor
+        imagePickerController = UIImagePickerController()
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Make the first textfield the first responder
+        if let v = self.view.viewWithTag(1) {
+            v.becomeFirstResponder()
+        }
     }
     
     //actions
@@ -33,11 +52,85 @@ class ContactAddEditController: UITableViewController, UINavigationControllerDel
         }
         else {
             // Add new contact
+            var firstName = ""
+            var lastName = ""
+            var phoneNumber = ""
+            var emailAddress = ""
+            if let firstNameTextfield = self.view.viewWithTag(1) as? UITextField, let lastNameTextfield = self.view.viewWithTag(2) as? UITextField, let phoneTextfield = self.view.viewWithTag(3) as? UITextField, let emailTextfield = self.view.viewWithTag(4) as? UITextField {
+                firstName = firstNameTextfield.text!
+                lastName = lastNameTextfield.text!
+                emailAddress = emailTextfield.text!
+                phoneNumber = phoneTextfield.text!
+                
+//                let contact = Contact(context: <#T##NSManagedObjectContext#>)
+            }
+            
+        }
+    }
+    
+    func openImagePicker() {
+        self.popupAlert(title: "", message: "Choose Action",style:.actionSheet, actionTitles: ["Open Gallery", "Open Camera","Cancel"], actions: [{action1 in
+            self.openGallery()
+        },{action2 in
+            self.openCamera()
+        },nil])
+    }
+    
+    func openGallery()
+    {
+        imagePickerController?.delegate = self
+        imagePickerController?.allowsEditing = false
+        imagePickerController?.sourceType = UIImagePickerControllerSourceType.photoLibrary
+        present(imagePickerController!, animated: true, completion: nil)
+    }
+    
+    func openCamera() {
+        if(UIImagePickerController .isSourceTypeAvailable(UIImagePickerControllerSourceType.camera)){
+            imagePickerController!.delegate = self
+            imagePickerController!.allowsEditing = false
+            imagePickerController!.sourceType = UIImagePickerControllerSourceType.camera
+            imagePickerController!.cameraCaptureMode = .photo
+            present(imagePickerController!, animated: true, completion: nil)
+        } else {
+            self.popupAlert(title: "Error", message: "This device has no camera.", style: .alert, actionTitles: ["OK"], actions: [nil])
         }
     }
     
     func popViewController() {
-        self.navigationController?.popViewController(animated: true)
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    func dismissKeyBoardOnTap() {
+        self.view.endEditing(true)
+    }
+}
+
+extension ContactAddEditController:UIImagePickerControllerDelegate {
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+        if let contactImageView = self.view.viewWithTag(99) as? UIImageView {
+            contactImageView.image = image
+        }
+        picker.dismiss(animated: true, completion: nil)
+    }
+}
+
+extension ContactAddEditController:UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        let tag = textField.tag
+        var nextTag = 1
+        if tag < 4 {
+            nextTag = textField.tag + 1
+        }
+        
+        if let v = self.tableView.viewWithTag(nextTag) {
+            v.becomeFirstResponder()
+        }
+        return false
     }
 }
 
@@ -49,7 +142,6 @@ extension ContactAddEditController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         return 4
     }
     
@@ -58,17 +150,53 @@ extension ContactAddEditController {
     }
     
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headerView = AddEditHeaderView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 260))
+        let headerView = AddEditHeaderView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 200))
+        headerView.profileImgView.tag = 99
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyBoardOnTap))
+        headerView.addGestureRecognizer(tapGesture)
+        headerView.cameraImgView.isUserInteractionEnabled = true
+        let addImageTap = UITapGestureRecognizer(target: self, action: #selector(openImagePicker))
+        headerView.cameraImgView.addGestureRecognizer(addImageTap)
         return headerView
     }
     
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 260
+        return 200
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! AddEditCell
         cell.titleLabel.text = tableFields[indexPath.row]
+        cell.textField.tag = indexPath.row + 1
+        cell.textField.delegate = self
+        if indexPath.row == 2 {
+            cell.textField.keyboardType = .phonePad
+        }
+        
+        if indexPath.row == 3 {
+            cell.textField.keyboardType = .emailAddress
+        }
+        
+        if let contact = self.contact {
+            switch indexPath.row {
+            case 0:
+                cell.textField.text = contact.firstName
+                break
+            case 1:
+                cell.textField.text = contact.lastName
+                break
+            case 0:
+                cell.textField.text = contact.phoneNumber
+                break
+            case 0:
+                cell.textField.text = contact.email
+                break
+            default:
+                break
+            }
+        }
+        
+        cell.selectionStyle = .none
         return cell
     }
 }
@@ -143,11 +271,6 @@ class AddEditHeaderView:UIView {
         imageBackgroundView.addConstraintsWithFormat(format: "V:[v0(40)]|", views: cameraImgView)
         imageBackgroundView.addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerX, relatedBy: .equal, toItem: imageBackgroundView, attribute: .centerX, multiplier: 1, constant: 0))
         imageBackgroundView.addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerY, relatedBy: .equal, toItem: imageBackgroundView, attribute: .centerY, multiplier: 1, constant: 0))
-        
-//        addConstraint(NSLayoutConstraint(item: cameraImgView, attribute: ., relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
-//        addConstraint(NSLayoutConstraint(item: cameraImgView, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: 0))
-        
-        
     }
     
     required init?(coder aDecoder: NSCoder) {
