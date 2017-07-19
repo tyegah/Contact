@@ -12,17 +12,22 @@ class ContactListController: UITableViewController {
     let cellId = "CellId"
     var contacts:[Contact]?
     var indices:[String]?
+    private let contactPresenter = ContactListPresenter(coreDataManager: CoreDataManager(persistentContainer: (UIApplication.shared.delegate as! AppDelegate).persistentContainer))
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.setupView()
+        contactPresenter.attachView(view: self)
+        print("controller did loadcontacts")
+        contactPresenter.loadContacts()
     }
     
     func getContactsForSection(section:Int) -> [Contact] {
         return contacts?.filter{ ($0.firstName?.characters.first?.description ?? "").lowercased() == indices![section].lowercased()} ?? []
     }
-    
-    func setupView() {
+}
+
+extension ContactListController:ContactListViewProtocol {
+    override func setupViewLayout() {
         self.navigationItem.title = "Contact"
         let leftBarButton = UIBarButtonItem(title: "Groups", style: .plain, target: self, action: #selector(showGroups))
         let rightBarButton = UIBarButtonItem(image: UIImage(named:"plus"), style: .plain, target: self, action: #selector(addContact))
@@ -36,9 +41,32 @@ class ContactListController: UITableViewController {
         tableView.sectionIndexColor = UIColor.black
         tableView.sectionIndexTrackingBackgroundColor = UIColor.clear
         tableView.backgroundColor = UIColor.white
-//        if contacts == nil {
-//            showEmptyView(UIImage(named:"empty_box")!, text: "Oops! It seems like you have no contacts yet.")
-//        }
+    }
+    
+    func loadContacts(contacts: [Contact]) {
+        print("view protocol load contacts called")
+        hideEmptyView()
+        var chars = contacts.map{ $0.firstName?.characters.first?.description.uppercased() ?? ""}
+        chars = chars.sorted{ $0 < $1 }
+        var i = 0
+        var tempIndices = [String]()
+        while chars.count > 0 {
+            let char = chars[0]
+            tempIndices.append(char)
+            chars = chars.filter{ $0 != char }
+            i += 1
+        }
+        
+        indices = tempIndices.sorted { $0 < $1 }
+        self.contacts = contacts
+        DispatchQueue.main.async {
+            self.tableView.isHidden = false
+            self.tableView.reloadData()
+        }
+    }
+    
+    func setEmptyUsers() {
+        showEmptyView(UIImage(named:"empty_box")!, text: "Oops! It seems like you have no contacts yet.")
     }
     
     //Actions
@@ -52,7 +80,7 @@ class ContactListController: UITableViewController {
         self.present(navVC, animated: true, completion: nil)
     }
     
-    func showContactDetail() {
+    func showDetailContact(contact: Contact) {
         let detailVC = ContactDetailController(style: .plain)
         self.navigationController?.pushViewController(detailVC, animated: true)
     }
@@ -65,18 +93,21 @@ extension ContactListController {
         if let count = indices?.count {
             return count
         }
-        return 1
+        return 0
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
-//        return getContactsForSection(section: section).count
+//        return 1
+        return getContactsForSection(section: section).count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! ContactCell
-//        let contact = getContactsForSection(section: indexPath.section)[indexPath.row]
-//        cell.setupView(contact: contact)
+        let contact = getContactsForSection(section: indexPath.section)[indexPath.row]
+        cell.setupView(contact: contact)
+//        if indexPath.row == 0 {
+//            print(contact.uuid)
+//        }
         return cell
     }
     
@@ -88,8 +119,12 @@ extension ContactListController {
         return indices
     }
     
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return indices?[section]
+    }
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.showContactDetail()
+//        self.showDetailContact(contact: <#T##Contact#>)
     }
 }
 

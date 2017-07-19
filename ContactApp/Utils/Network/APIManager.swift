@@ -17,7 +17,7 @@ typealias DeleteContactCompletion = (Bool) -> Void
 class APIManager {
     static let shared = APIManager()
     private let networking:Networking
-    private let reachability = Reachability()!
+    let reachability = Reachability()!
     init() {
         networking = Networking(baseURL: Config.baseURL)
         do {
@@ -31,41 +31,119 @@ class APIManager {
     func fetchContacts(completion: @escaping FetchContactsCompletion) {
         if reachability.isReachable {
             networking.get(pathURL: "contacts.json") { (response) in
-                print(response.responseJSON)
+//                print(response.responseJSON ?? ["":""])
                 if let json = response.responseJSON as? [[String:Any]] {
                     completion(json)
+                    return
                 }
+                completion(nil)
             }
         }
-        completion(nil)
+        else {
+            completion(nil)
+        }
     }
     
     func fetchContactDetailWithId(_ id:Int, completion: @escaping FetchContactDetailCompletion) {
         if reachability.isReachable {
             networking.get(pathURL: "contacts/\(id).json", completion: { (response) in
-                print("Contact Detail response \(response.responseJSON)")
+                print("Contact Detail response \(String(describing: response.responseJSON))")
                 if let json = response.responseJSON as? [String:Any] {
                     completion(json)
+                    return
                 }
+                
+                completion(nil)
             })
         }
-        completion(nil)
+        else {
+            completion(nil)
+        }
     }
     
+    func addNewContact(_ contact:Contact, completion: @escaping AddNewContactCompletion) {
+        if reachability.isReachable {
+            if let contactJSON = Contact.toJSONDictionary(contact: contact) as? [String:String]{
+                networking.post(pathURL: "contacts.json", parameters: contactJSON, completion: { (response) in
+                    if let json = response.responseJSON as? [String:Any] {
+                        completion(json)
+                        return
+                    }
+                    else {
+                        completion(nil)
+                    }
+                })
+            }
+            else {
+                completion(nil)
+            }
+        }
+        else {
+            completion(nil)
+        }
+    }
+    
+    func updateContact(_ contact:Contact, completion: @escaping UpdateContactCompletion) {
+        if reachability.isReachable {
+            if let dict = Contact.toJSONDictionary(contact: contact) {
+                networking.put(pathURL: "contacts/\(contact.id).json", parameters: dict, completion: { (response) in
+                    if let json = response.responseJSON as? [String:Any] {
+                        completion(json)
+                        return
+                    }
+                    else {
+                        completion(nil)
+                    }
+                })
+            }
+            else {
+                completion(nil)
+            }
+        }
+        else {
+            completion(nil)
+        }
+    }
+    
+    
+    func createAddContactRequest(_ contact: Contact) -> ContactManagerAddRequest {
+        return ContactManagerAddRequest(contact: contact)
+    }
+    
+    func createUpdateContactRequest(_ contact:Contact) -> ContactManagerUpdateRequest {
+        return ContactManagerUpdateRequest(contact: contact)
+    }
 }
 
 
 class ContactManagerAddRequest {
     var contact:Contact
     var networking:Networking
+    let reachability = Reachability()!
     required init(contact:Contact) {
         self.contact = contact
         networking = Networking(baseURL: Config.baseURL)
     }
     
     func performAdd(with completion:@escaping AddNewContactCompletion) {
-        networking.post(pathURL: "contacts.json", parameters: ["":""]) { (response) in
-            
+        if reachability.isReachable {
+            if let contactJSON = Contact.toJSONDictionary(contact: contact) as? [String:String]{
+                networking.post(pathURL: "contacts.json", parameters: contactJSON, completion: { (response) in
+                    if let json = response.responseJSON as? [String:Any] {
+                        completion(json)
+                        return
+                    }
+                    else {
+                        completion(nil)
+                    }
+                })
+            }
+            else {
+                completion(nil)
+            }
+        }
+        else {
+            completion(nil)
         }
     }
 }
@@ -73,14 +151,31 @@ class ContactManagerAddRequest {
 class ContactManagerUpdateRequest {
     var contact:Contact
     var networking:Networking
+    let reachability = Reachability()!
     required init(contact:Contact) {
         self.contact = contact
         networking = Networking(baseURL: Config.baseURL)
     }
     
     func performUpdate(with completion:@escaping UpdateContactCompletion) {
-        networking.put(pathURL: "contacts\(contact.id).json", parameters: ["":""]) { (response) in
-            
+        if reachability.isReachable {
+            if let dict = Contact.toJSONDictionary(contact: contact) {
+                networking.put(pathURL: "contacts/\(contact.id).json", parameters: dict, completion: { (response) in
+                    if let json = response.responseJSON as? [String:Any] {
+                        completion(json)
+                        return
+                    }
+                    else {
+                        completion(nil)
+                    }
+                })
+            }
+            else {
+                completion(nil)
+            }
+        }
+        else {
+            completion(nil)
         }
     }
 }

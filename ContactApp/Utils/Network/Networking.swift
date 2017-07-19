@@ -16,23 +16,23 @@ class Networking {
         self.baseURL = baseURL
     }
     
-    func get(pathURL:String,parameters:[String:String]? = nil, completion: @escaping NetworkingCompletion) {
+    func get(pathURL:String,parameters:[String:Any]? = nil, completion: @escaping NetworkingCompletion) {
         requestWithMethod(pathURL:pathURL, method: "GET", completion: completion)
     }
     
-    func post(pathURL:String,parameters:[String:String]? = nil, completion: @escaping NetworkingCompletion) {
+    func post(pathURL:String,parameters:[String:Any]? = nil, completion: @escaping NetworkingCompletion) {
         requestWithMethod(pathURL:pathURL, method: "POST", bodyParameters:parameters, completion: completion)
     }
     
-    func put(pathURL:String,parameters:[String:String]? = nil, completion: @escaping NetworkingCompletion) {
+    func put(pathURL:String,parameters:[String:Any]? = nil, completion: @escaping NetworkingCompletion) {
         requestWithMethod(pathURL:pathURL, method: "PUT", bodyParameters:parameters, completion: completion)
     }
     
-    func delete(pathURL:String,parameters:[String:String]? = nil, completion: @escaping NetworkingCompletion) {
+    func delete(pathURL:String,parameters:[String:Any]? = nil, completion: @escaping NetworkingCompletion) {
         requestWithMethod(pathURL:pathURL, method: "DELETE", completion: completion)
     }
     
-    private func requestWithMethod(pathURL:String, method:String, queryParameters:[String:String]? = nil, bodyParameters:[String:String]? = nil, completion: @escaping NetworkingCompletion) {
+    private func requestWithMethod(pathURL:String, method:String, queryParameters:[String:String]? = nil, bodyParameters:[String:Any]? = nil, completion: @escaping NetworkingCompletion) {
         if let request = URLRequest.requestWithURL(URL(string: pathURL, relativeTo: URL(string: baseURL))!,method: method,queryParameters: queryParameters, bodyParameters: bodyParameters, headers: nil) {
             let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
                 var err = error
@@ -52,7 +52,7 @@ class Networking {
 }
 
 extension URLRequest {
-    static func requestWithURL(_ url:URL, method:String, queryParameters:[String:String]?, bodyParameters:[String:String]?, headers:[String:String]?) -> URLRequest? {
+    static func requestWithURL(_ url:URL, method:String, queryParameters:[String:String]?, bodyParameters:[String:Any]?, headers:[String:String]?) -> URLRequest? {
         var theURL:URL
         if let queryParameters = queryParameters {
             var components = URLComponents(url: url, resolvingAgainstBaseURL: true)

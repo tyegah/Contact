@@ -20,10 +20,23 @@ class ContactAddEditController: UITableViewController, UINavigationControllerDel
             }
         }
     }
+    
     var imagePickerController:UIImagePickerController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupViewLayout()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Make the first textfield the first responder
+        if let v = self.view.viewWithTag(1) {
+            v.becomeFirstResponder()
+        }
+    }
+    
+    override func setupViewLayout() {
         self.navigationItem.hidesBackButton = true
         let cancelBarButton = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(popViewController))
         let saveBarButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(saveContact))
@@ -34,15 +47,6 @@ class ContactAddEditController: UITableViewController, UINavigationControllerDel
         tableView.tableFooterView = UIView()
         tableView.sectionIndexBackgroundColor = Color.backgroundColor
         imagePickerController = UIImagePickerController()
-        
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        // Make the first textfield the first responder
-        if let v = self.view.viewWithTag(1) {
-            v.becomeFirstResponder()
-        }
     }
     
     //actions

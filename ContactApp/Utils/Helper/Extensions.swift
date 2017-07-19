@@ -9,6 +9,24 @@
 import Foundation
 import UIKit
 
+extension String {
+    func convertServerTimeToDate() -> Date? {
+        print("string time",self)
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let dateFormatter:DateFormatter
+        if appDelegate.dateFormatter == nil {
+            appDelegate.dateFormatter = DateFormatter()
+        }
+        dateFormatter = appDelegate.dateFormatter!
+        //        let tempLocale = dateFormatter.locale // save locale temporarily
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX") // set locale to reliable US_POSIX
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        print("converted time \(dateFormatter.date(from: self))")
+        print("now date \(Date())")
+        return dateFormatter.date(from: self)
+    }
+}
+
 extension UIView {
     func addConstraintsWithFormat(format:String, views: UIView...) {
         var viewsDictionary = [String:UIView]()
@@ -34,6 +52,31 @@ extension UIViewController {
             alert.addAction(action)
         }
         self.present(alert, animated: true, completion: nil)
+    }
+}
+
+extension UIViewController:ContactBaseProtocol {
+    var activityIndicator:UIActivityIndicatorView {
+        let ai = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        ai.hidesWhenStopped = true
+        ai.center = self.view.center
+        return ai
+    }
+    
+    func setupViewLayout() {
+        
+    }
+    
+    func showLoadingIndicator() {
+        self.view.bringSubview(toFront: self.activityIndicator)
+        self.activityIndicator.isHidden = false
+        self.activityIndicator.startAnimating()
+    }
+    
+    func hideLoadingIndicator() {
+        self.activityIndicator.stopAnimating()
+        self.activityIndicator.isHidden = true
+        self.activityIndicator.removeFromSuperview()
     }
 }
 

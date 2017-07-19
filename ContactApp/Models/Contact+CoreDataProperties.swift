@@ -24,7 +24,8 @@ extension Contact {
     @NSManaged public var profilePic: String?
     @NSManaged public var email: String?
     @NSManaged public var phoneNumber: String?
-    @NSManaged public var createdAt: NSDate?
-    @NSManaged public var updatedAt: NSDate?
+    @NSManaged public var createdAt: Int64
+    @NSManaged public var updatedAt: Int64
+    @NSManaged public var uuid: String?
 
 }
