@@ -29,9 +29,7 @@ struct ContactSynchronizer {
             self.uploadSync {
                 self.downloadSync {
                     UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "lastSyncAttempt")
-                    self.coreDataManager.saveContext()
                     completion()
-                    print("called")
                     syncGroup.leave()
                 }
             }
@@ -43,33 +41,75 @@ struct ContactSynchronizer {
     }
     
     func downloadSync(_ completionBlock: @escaping () -> Void) -> Void {
-        print("download sync")
         APIManager.shared.fetchContacts { (jsonDict) in
-            if let dicts = jsonDict {
-                var contacts = [Contact]()
-                let localContacts = self.coreDataManager.allContacts()
-                // if contacts are still empty, insert into coredata
-                if localContacts.count == 0 {
-                    dicts.forEach { dict in
-                        let contact = Contact(context: self.persistentContainer.viewContext)
-                        contact.configureWithJSONDictionary(dict)
-                        contacts.append(contact)
-                    }
-                    self.coreDataManager.saveContext()
-                    
-                    dicts.forEach { dict in
-                        // check if server data is newer than local
-                        let id = (dict["id"] as? NSNumber)?.intValue ?? 0
-                        APIManager.shared.fetchContactDetailWithId(id, completion: { (jsonDict) in
-                            let localContact = self.coreDataManager.contactWithId(id)
-                            if let json = jsonDict, let _ = localContact {
-                                localContact?.configureWithJSONDictionary(json, isUpdate: true)
-                            }
-                        })
+            DispatchQueue.main.async {
+                if let dicts = jsonDict {
+                    var contacts = [Contact]()
+                    let localContacts = self.coreDataManager.allContacts()
+                    // if contacts are still empty, insert into coredata
+                    if localContacts.count == 0 {
+                        dicts.forEach { dict in
+                            let contact = Contact(context: self.persistentContainer.viewContext)
+                            contact.configureWithJSONDictionary(dict)
+                            contacts.append(contact)
+                        }
                         self.coreDataManager.saveContext()
+                        
+                        dicts.forEach { dict in
+                            // check if server data is newer than local
+                            let id = (dict["id"] as? NSNumber)?.intValue ?? 0
+                            APIManager.shared.fetchContactDetailWithId(id, completion: { (jsonDict) in
+                                let localContact = self.coreDataManager.contactWithId(id)
+                                if let json = jsonDict, let _ = localContact {
+                                    localContact?.configureWithJSONDictionary(json, isUpdate: true)
+                                }
+                            })
+                            self.coreDataManager.saveContext()
+                        }
                     }
                 }
             }
+//            self.coreDataManager.persistentContainer.performBackgroundTask({ (context) in
+//                if let dicts = jsonDict {
+//                    print("dict \(dicts)")
+//                    var contacts = [Contact]()
+//                    let localContacts = self.coreDataManager.allContacts()
+//                    // if contacts are still empty, insert into coredata
+//                    if localContacts.count == 0 {
+//                        dicts.forEach { dict in
+//                            let contact = Contact(context: self.persistentContainer.viewContext)
+//                            contact.configureWithJSONDictionary(dict)
+//                            contacts.append(contact)
+//                        }
+//                        
+//                        print("download sync is main thread \(Thread.isMainThread)")
+//                        do {
+//                            try context.save()
+//                        }
+//                        catch {
+//                            print("error saving")
+//                        }
+//                        
+//                        dicts.forEach { dict in
+//                            // check if server data is newer than local
+//                            let id = (dict["id"] as? NSNumber)?.intValue ?? 0
+//                            APIManager.shared.fetchContactDetailWithId(id, completion: { (jsonDict) in
+//                                let localContact = self.coreDataManager.contactWithId(id)
+//                                if let json = jsonDict, let _ = localContact {
+//                                    localContact?.configureWithJSONDictionary(json, isUpdate: true)
+//                                }
+//                            })
+//                            do {
+//                                try context.save()
+//                            }
+//                            catch {
+//                                print("error saving detail")
+//                            }
+//                        }
+//                    }
+//                }
+//            })
+
             completionBlock()
             return
         }
@@ -86,17 +126,20 @@ struct ContactSynchronizer {
             uploadGroup.enter()
             request.performAdd(with: { (jsonDict) in
                 if let dict = jsonDict {
+                    let context = self.coreDataManager.persistentContainer.newBackgroundContext()
                     // select uploaded contact from local db
-                    if let localContact = self.coreDataManager.persistentContainer.viewContext.object(with: request.contact.objectID) as? Contact {
+                    if let localContact = context.object(with: request.contact.objectID) as? Contact {
                         // assign id from server
                         localContact.id = (dict["id"] as? NSNumber)?.int32Value ?? 0
-//                        if let updatedDate = (dict["updated_at"] as? String)?.convertServerTimeToDate() {
-//                            localContact.updatedAt = Int64(updatedDate.timeIntervalSince1970)
-//                            print("server update time \(updatedDate)")
-//                        }
-
-                        self.coreDataManager.saveContext()
+                        
+                        do {
+                            try context.save()
+                        }
+                        catch {
+                            print("error updating id")
+                        }
                     }
+//                    })
                 }
                 uploadGroup.leave()
             })
@@ -107,14 +150,19 @@ struct ContactSynchronizer {
             request.performUpdate(with: { (jsonDict) in
                 if let dict = jsonDict {
                     // select uploaded contact from local db
-                    if let localContact = self.coreDataManager.persistentContainer.viewContext.object(with: request.contact.objectID) as? Contact {
+                    let context = self.coreDataManager.persistentContainer.newBackgroundContext()
+                    if let localContact = context.object(with: request.contact.objectID) as? Contact {
                         // update last updated time
                         if let updatedDate = (dict["updated_at"] as? String)?.convertServerTimeToDate() {
                             localContact.updatedAt = Int64(updatedDate.timeIntervalSince1970)
-                            print("server update time \(updatedDate)")
                         }
                         
-                        self.coreDataManager.saveContext()
+                        do {
+                            try context.save()
+                        }
+                        catch {
+                            print("error updating detail")
+                        }
                     }
                 }
                 uploadGroup.leave()
@@ -131,14 +179,16 @@ struct ContactSynchronizer {
     }
     
     func syncDownloadSingleContactWithId(_ id:Int, completion: @escaping (Contact?) -> Void) {
-        let localContact = self.coreDataManager.contactWithId(id)
         ContactManagerDetailRequest(id: id).performFetch { (json) in
-            if let dict = json, let contact = localContact {
-                contact.configureWithJSONDictionary(dict, isUpdate: true)
+            DispatchQueue.main.async {
+                let localContact = self.coreDataManager.contactWithId(id)
+                if let dict = json, let contact = localContact {
+                    contact.configureWithJSONDictionary(dict, isUpdate: true)
+                }
+                self.coreDataManager.saveContext()
+                // return newly synced data
+                completion(self.coreDataManager.contactWithId(id))
             }
-            self.coreDataManager.saveContext()
-            // return newly synced data
-            completion(self.coreDataManager.contactWithId(id))
         }
     }
     

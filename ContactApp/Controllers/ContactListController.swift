@@ -17,7 +17,10 @@ class ContactListController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         contactPresenter.attachView(view: self)
-        print("controller did loadcontacts")
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         contactPresenter.loadContacts()
     }
     
@@ -44,8 +47,13 @@ extension ContactListController:ContactListViewProtocol {
     }
     
     func loadContacts(contacts: [Contact]) {
-        print("view protocol load contacts called")
-        hideEmptyView()
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        if contacts.count == 0 && appDelegate.isFirstLoad {
+            appDelegate.isFirstLoad = false
+            contactPresenter.loadContacts()
+            return
+        }
+        
         var chars = contacts.map{ $0.firstName?.characters.first?.description.uppercased() ?? ""}
         chars = chars.sorted{ $0 < $1 }
         var i = 0
@@ -60,7 +68,9 @@ extension ContactListController:ContactListViewProtocol {
         indices = tempIndices.sorted { $0 < $1 }
         self.contacts = contacts
         DispatchQueue.main.async {
-            self.tableView.isHidden = false
+            if contacts.count > 0 {
+                self.hideEmptyView()
+            }
             self.tableView.reloadData()
         }
     }
@@ -138,7 +148,6 @@ class ContactCell:UITableViewCell {
     
     fileprivate lazy var nameLabel:UILabel = {
         let label = UILabel()
-        label.text = "Test Name"
         label.textAlignment = .left
         label.font = UIFont.boldSystemFont(ofSize: 16)
         return label

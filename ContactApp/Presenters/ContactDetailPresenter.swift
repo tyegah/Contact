@@ -27,11 +27,15 @@ class ContactDetailPresenter {
         contactView = nil
     }
     
-    func reloadView() {
-        self.contactView?.reloadView()
-    }
-    
     func makeFavorite(contact:Contact?) {
-        // 
+        if let contact = contact {
+            contact.isFavorite = !contact.isFavorite
+            contact.updatedAt = Int64(Date().timeIntervalSince1970)
+            coreDataManager.saveContext()
+            self.contactView?.reloadView(contact:contact)
+            syncManager.uploadSync {
+                
+            }
+        }
     }
 }

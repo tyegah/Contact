@@ -9,8 +9,11 @@
 import Foundation
 
 protocol ContactDetailViewProtocol:ContactBaseProtocol {
-//    func loadContact(contacts:Contact?)
-    func reloadView()
+    func reloadView(contact:Contact?)
     // actions
     func editContact()
+    func makeCall()
+    func sendMessage()
+    func sendEmail()
+    func makeFavorite()
 }

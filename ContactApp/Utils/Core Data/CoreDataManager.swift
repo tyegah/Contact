@@ -63,10 +63,10 @@ class CoreDataManager {
     func addNewContact(_ firstName:String?, lastName:String?, phoneNumber:String?, email:String?, profilePicture:String? = "") -> Contact? {
         let contact = Contact(context: persistentContainer.viewContext)
         contact.id = 0
-        contact.firstName = firstName
-        contact.lastName = lastName
-        contact.phoneNumber = phoneNumber
-        contact.email = email
+        contact.firstName = firstName ?? ""
+        contact.lastName = lastName ?? ""
+        contact.phoneNumber = phoneNumber ?? ""
+        contact.email = email ?? ""
         contact.createdAt = Int64(Date().timeIntervalSince1970)
         contact.updatedAt = Int64(Date().timeIntervalSince1970)
         contact.url = ""
@@ -76,6 +76,18 @@ class CoreDataManager {
         contact.uuid = uuid
         self.saveContext()
         return contactWithUniqueId(uuid)
+    }
+    
+    func updateContactWithId(_ id:Int, firstName:String?, lastName:String?, phoneNumber:String?, email:String?, profilePicture:String? = "") {
+        if let contact = self.contactWithId(id) {
+            contact.firstName = firstName ?? ""
+            contact.lastName = lastName ?? ""
+            contact.phoneNumber = phoneNumber ?? ""
+            contact.email = email ?? ""
+            contact.createdAt = Int64(Date().timeIntervalSince1970)
+            contact.updatedAt = Int64(Date().timeIntervalSince1970)
+            self.saveContext()
+        }
     }
     
     // contacts that aren't available on server
@@ -95,6 +107,7 @@ class CoreDataManager {
     
     // contacts that are updated locally but not on server
     func contactsThatChangedSince(_ timestamp: TimeInterval) -> [Contact] {
+        print("sync timestamp \(timestamp)")
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Contact")
         fetchRequest.predicate = NSPredicate(format: "updatedAt > %f", timestamp)
         do {

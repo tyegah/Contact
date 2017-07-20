@@ -192,10 +192,10 @@ extension ContactAddEditController {
             case 1:
                 cell.textField.text = contact.lastName
                 break
-            case 0:
+            case 2:
                 cell.textField.text = contact.phoneNumber
                 break
-            case 0:
+            case 3:
                 cell.textField.text = contact.email
                 break
             default:

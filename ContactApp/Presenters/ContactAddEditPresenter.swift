@@ -37,12 +37,15 @@ class ContactAddEditPresenter {
         if id == 0 {
             let contact = coreDataManager.addNewContact(firstName, lastName: lastName, phoneNumber: phoneNumber, email: email)
             print("contact", contact?.firstName ?? "")
-            syncManager.uploadSync {
-                
-            }
         }
         else {
+            coreDataManager.updateContactWithId(id, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, email: email)
+        }
+        
+        syncManager.uploadSync {
             
         }
+        
+        self.contactView?.popView()
     }
 }

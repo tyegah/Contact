@@ -10,22 +10,17 @@ import UIKit
 
 class ContactDetailController: UITableViewController {
     let cellId = "DetailCell"
-    var contact:Contact? {
-        didSet {
-            contactPresenter.reloadView()
-        }
-    }
+    var contact:Contact?
     let contactPresenter = ContactDetailPresenter(coreDataManager: CoreDataManager(persistentContainer: (UIApplication.shared.delegate as! AppDelegate).persistentContainer))
     override func viewDidLoad() {
         super.viewDidLoad()
         contactPresenter.attachView(view: self)
     }
     
-//    override func viewDidAppear(_ animated: Bool) {
-//        super.viewDidAppear(animated)
-//        contactPresenter.reloadView()
-//    }
-
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.reloadView(contact: contact)
+    }
 }
 
 extension ContactDetailController:ContactDetailViewProtocol {
@@ -38,8 +33,11 @@ extension ContactDetailController:ContactDetailViewProtocol {
         self.navigationItem.rightBarButtonItem = editBarButton
     }
     
-    func reloadView() {
-        self.tableView.reloadData()
+    func reloadView(contact:Contact?) {
+        DispatchQueue.main.async {
+            self.contact = contact
+            self.tableView.reloadData()
+        }
     }
     
     func editContact() {
@@ -47,6 +45,22 @@ extension ContactDetailController:ContactDetailViewProtocol {
         addeditVC.contact = contact
         let navVC = UINavigationController(rootViewController: addeditVC)
         self.present(navVC, animated: true, completion: nil)
+    }
+    
+    func makeCall() {
+        
+    }
+    
+    func makeFavorite() {
+        contactPresenter.makeFavorite(contact: contact)
+    }
+    
+    func sendEmail() {
+        
+    }
+    
+    func sendMessage() {
+        
     }
 }
 
@@ -82,13 +96,22 @@ extension ContactDetailController {
     
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = HeaderView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 260))
+        headerView.isUserInteractionEnabled = true
         headerView.profileImgView.loadImage(urlString: contact?.profilePic ?? "")
         headerView.nameLabel.text = "\(contact?.firstName ?? "") \(contact?.lastName ?? "")"
         if let bool = contact?.isFavorite {
             if bool {
                 headerView.favoriteButton.setImage(UIImage(named:"favorite_selected"), for: .normal)
             }
+            else {
+                headerView.favoriteButton.setImage(UIImage(named:"favorite"), for: .normal)
+            }
         }
+    
+        headerView.favoriteButton.addTarget(self, action: #selector(makeFavorite), for: .touchUpInside)
+        headerView.messageButton.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
+        headerView.emailButton.addTarget(self, action: #selector(sendEmail), for: .touchUpInside)
+        headerView.callButton.addTarget(self, action: #selector(makeCall), for: .touchUpInside)
         
         return headerView
     }
@@ -249,18 +272,20 @@ class HeaderView:UIView {
         
         
         let stackView = UIStackView()
+        stackView.isUserInteractionEnabled = true
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .horizontal
         stackView.spacing = 10
         stackView.alignment = .center
         stackView.distribution = .equalCentering
         stackView.backgroundColor = UIColor.red
-        stackView.clipsToBounds = true
         
         let buttonArray = [messageButton, callButton, emailButton, favoriteButton]
         let labelArray = [messageLabel, callLabel, emailLabel, favoriteLabel]
         for (index, button) in buttonArray.enumerated() {
             let buttonContainerView = UIView(frame: CGRect(x: 0, y: 0, width: 60, height: 56))
+            buttonContainerView.isUserInteractionEnabled = true
+            button.isUserInteractionEnabled  = true
             buttonContainerView.addSubview(button)
             buttonContainerView.addSubview(labelArray[index])
             buttonContainerView.addConstraintsWithFormat(format: "V:|[v0(40)]-2-[v1]", views: button,  labelArray[index])
