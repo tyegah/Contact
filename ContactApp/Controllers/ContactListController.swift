@@ -38,12 +38,22 @@ extension ContactListController:ContactListViewProtocol {
         self.navigationItem.leftBarButtonItem = leftBarButton
         
         tableView.register(ContactCell.self, forCellReuseIdentifier: cellId)
+        tableView.bounces = true
+        self.refreshControl?.isEnabled = true
         tableView.separatorColor = UIColor.clear
         tableView.tableFooterView = UIView()
         tableView.sectionIndexBackgroundColor = Color.backgroundColor
         tableView.sectionIndexColor = UIColor.black
         tableView.sectionIndexTrackingBackgroundColor = UIColor.clear
         tableView.backgroundColor = UIColor.white
+        self.refreshControl?.tintColor = UIColor(red:0.25, green:0.72, blue:0.85, alpha:1.0)
+        self.refreshControl?.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+    }
+    
+    func handleRefresh() {
+        self.refreshControl?.beginRefreshing()
+        contactPresenter.loadContacts()
+        self.refreshControl?.endRefreshing()
     }
     
     func loadContacts(contacts: [Contact]) {

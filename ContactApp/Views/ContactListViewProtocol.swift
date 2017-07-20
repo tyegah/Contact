@@ -13,6 +13,7 @@ protocol ContactListViewProtocol:ContactBaseProtocol {
     func setEmptyUsers()
     
     // actions
+    func handleRefresh()
     func showGroups()
     func addContact()
     func showDetailContact(contact:Contact?)
