@@ -28,9 +28,9 @@ class CoreDataManager {
         return []
     }
     
-    func contactWithId(_ id:String) -> Contact? {
+    func contactWithId(_ id:Int) -> Contact? {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Contact")
-        fetchRequest.predicate = NSPredicate(format: "id = %@", id)
+        fetchRequest.predicate = NSPredicate(format: "id = %d", id)
         do {
             let contacts = try self.persistentContainer.viewContext.fetch(fetchRequest) as? [Contact]
             if let count = contacts?.count, count > 0 {
@@ -90,12 +90,11 @@ class CoreDataManager {
     
     func saveContext () {
         let context = persistentContainer.viewContext
+        context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         if context.hasChanges {
             do {
                 try context.save()
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 let nserror = error as NSError
                 fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
             }

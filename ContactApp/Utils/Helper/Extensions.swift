@@ -20,9 +20,10 @@ extension String {
         dateFormatter = appDelegate.dateFormatter!
         //        let tempLocale = dateFormatter.locale // save locale temporarily
         dateFormatter.locale = Locale(identifier: "en_US_POSIX") // set locale to reliable US_POSIX
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-        print("converted time \(dateFormatter.date(from: self))")
-        print("now date \(Date())")
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSZ"
+//        let date = dateFormatter.date(from: self)
+//        print("converted time \(date)")
+//        print("now date \(Date())")
         return dateFormatter.date(from: self)
     }
 }
@@ -68,6 +69,7 @@ extension UIViewController:ContactBaseProtocol {
     }
     
     func showLoadingIndicator() {
+        self.view.addSubview(self.activityIndicator)
         self.view.bringSubview(toFront: self.activityIndicator)
         self.activityIndicator.isHidden = false
         self.activityIndicator.startAnimating()

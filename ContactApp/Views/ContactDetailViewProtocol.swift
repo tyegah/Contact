@@ -7,3 +7,10 @@
 //
 
 import Foundation
+
+protocol ContactDetailViewProtocol:ContactBaseProtocol {
+//    func loadContact(contacts:Contact?)
+    func reloadView()
+    // actions
+    func editContact()
+}

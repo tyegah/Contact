@@ -15,5 +15,5 @@ protocol ContactListViewProtocol:ContactBaseProtocol {
     // actions
     func showGroups()
     func addContact()
-    func showDetailContact(contact:Contact)
+    func showDetailContact(contact:Contact?)
 }

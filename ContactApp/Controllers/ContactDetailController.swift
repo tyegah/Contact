@@ -10,10 +10,26 @@ import UIKit
 
 class ContactDetailController: UITableViewController {
     let cellId = "DetailCell"
-    var contact:Contact?
+    var contact:Contact? {
+        didSet {
+            contactPresenter.reloadView()
+        }
+    }
+    let contactPresenter = ContactDetailPresenter(coreDataManager: CoreDataManager(persistentContainer: (UIApplication.shared.delegate as! AppDelegate).persistentContainer))
     override func viewDidLoad() {
         super.viewDidLoad()
+        contactPresenter.attachView(view: self)
+    }
+    
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//        contactPresenter.reloadView()
+//    }
 
+}
+
+extension ContactDetailController:ContactDetailViewProtocol {
+    override func setupViewLayout() {
         tableView.register(DetailCell.self, forCellReuseIdentifier: cellId)
         tableView.separatorColor = UIColor.clear
         tableView.tableFooterView = UIView()
@@ -21,10 +37,11 @@ class ContactDetailController: UITableViewController {
         let editBarButton = UIBarButtonItem(title:"Edit", style: .plain, target: self, action: #selector(editContact))
         self.navigationItem.rightBarButtonItem = editBarButton
     }
-
-}
-
-extension ContactDetailController {
+    
+    func reloadView() {
+        self.tableView.reloadData()
+    }
+    
     func editContact() {
         let addeditVC = ContactAddEditController(style: .plain)
         addeditVC.contact = contact
@@ -50,15 +67,14 @@ extension ContactDetailController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! DetailCell
-        
-        // Configure the cell...
+            // Configure the cell...
         if indexPath.row == 0 {
             cell.titleLabel.text = "mobile"
-            cell.contentLabel.text = "+1 234567890"
+            cell.contentLabel.text = contact?.phoneNumber ?? ""
         }
         if indexPath.row == 1 {
             cell.titleLabel.text = "email"
-            cell.contentLabel.text = "testing@gmail.com"
+            cell.contentLabel.text = contact?.email ?? ""
         }
         
         return cell
@@ -66,6 +82,14 @@ extension ContactDetailController {
     
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = HeaderView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 260))
+        headerView.profileImgView.loadImage(urlString: contact?.profilePic ?? "")
+        headerView.nameLabel.text = "\(contact?.firstName ?? "") \(contact?.lastName ?? "")"
+        if let bool = contact?.isFavorite {
+            if bool {
+                headerView.favoriteButton.setImage(UIImage(named:"favorite_selected"), for: .normal)
+            }
+        }
+        
         return headerView
     }
     
@@ -77,7 +101,6 @@ extension ContactDetailController {
 class DetailCell:UITableViewCell {
     lazy var titleLabel:UILabel = {
         let label = UILabel()
-        label.text = "mobile"
         label.textAlignment = .center
         label.textColor = Color.lightGrayTextColor
         label.font = UIFont.systemFont(ofSize: 16)
@@ -86,7 +109,6 @@ class DetailCell:UITableViewCell {
     
     lazy var contentLabel:UILabel = {
         let label = UILabel()
-        label.text = "mobile"
         label.textAlignment = .left
         label.font = UIFont.systemFont(ofSize: 16)
         return label
@@ -139,7 +161,7 @@ class HeaderView:UIView {
         label.numberOfLines = 0
         label.text = "Test Name"
         label.textAlignment = .center
-        label.font = UIFont.boldSystemFont(ofSize: 21)
+        label.font = UIFont.boldSystemFont(ofSize: 18)
         return label
     }()
     
@@ -256,11 +278,6 @@ class HeaderView:UIView {
         
         addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
         addConstraint(NSLayoutConstraint(item: nameLabel, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
-        
-        profileImgView.image = UIImage(named: "missing")
-        addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: 0))
-        addConstraint(NSLayoutConstraint(item: profileImgView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
-        
     }
     
     required init?(coder aDecoder: NSCoder) {

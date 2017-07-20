@@ -12,7 +12,7 @@ class ContactListController: UITableViewController {
     let cellId = "CellId"
     var contacts:[Contact]?
     var indices:[String]?
-    private let contactPresenter = ContactListPresenter(coreDataManager: CoreDataManager(persistentContainer: (UIApplication.shared.delegate as! AppDelegate).persistentContainer))
+    let contactPresenter = ContactListPresenter(coreDataManager: CoreDataManager(persistentContainer: (UIApplication.shared.delegate as! AppDelegate).persistentContainer))
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -80,8 +80,9 @@ extension ContactListController:ContactListViewProtocol {
         self.present(navVC, animated: true, completion: nil)
     }
     
-    func showDetailContact(contact: Contact) {
+    func showDetailContact(contact: Contact?) {
         let detailVC = ContactDetailController(style: .plain)
+        detailVC.contact = contact
         self.navigationController?.pushViewController(detailVC, animated: true)
     }
 }
@@ -97,7 +98,6 @@ extension ContactListController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        return 1
         return getContactsForSection(section: section).count
     }
     
@@ -105,9 +105,6 @@ extension ContactListController {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! ContactCell
         let contact = getContactsForSection(section: indexPath.section)[indexPath.row]
         cell.setupView(contact: contact)
-//        if indexPath.row == 0 {
-//            print(contact.uuid)
-//        }
         return cell
     }
     
@@ -124,7 +121,8 @@ extension ContactListController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        self.showDetailContact(contact: <#T##Contact#>)
+        let contact = getContactsForSection(section: indexPath.section)[indexPath.row]
+        contactPresenter.loadDetailContact(Int(contact.id))
     }
 }
 

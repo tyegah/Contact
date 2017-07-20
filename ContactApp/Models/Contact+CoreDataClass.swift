@@ -16,10 +16,12 @@ public class Contact: NSManagedObject {
         self.init(entity: entityDescription, insertInto: context)
     }
     
-    func configureWithJSONDictionary(_ jsonDict:[String:Any]) {
-        uuid = NSUUID().uuidString
-        id = jsonDict["id"] as? Int32 ?? 0
-        print("ID server \(id)")
+    func configureWithJSONDictionary(_ jsonDict:[String:Any], isUpdate:Bool = false) {
+        if !isUpdate {
+            uuid = NSUUID().uuidString
+        }
+        
+        id = (jsonDict["id"] as? NSNumber)?.int32Value ?? 0
         firstName = jsonDict["first_name"] as? String
         lastName = jsonDict["last_name"] as? String
         isFavorite = (jsonDict["favorite"] as? NSNumber)?.boolValue ?? false

@@ -11,9 +11,11 @@ import Foundation
 class ContactListPresenter {
     private let coreDataManager:CoreDataManager
     private var contactView: ContactListViewProtocol?
+    private let syncManager:ContactSynchronizer
     
     init(coreDataManager:CoreDataManager) {
         self.coreDataManager = coreDataManager
+        self.syncManager = ContactSynchronizer(persistentContainer: self.coreDataManager.persistentContainer)
     }
     
     func attachView(view:ContactListViewProtocol) {
@@ -28,7 +30,6 @@ class ContactListPresenter {
     func loadContacts() {
         print("loadcontacts")
         self.contactView?.showLoadingIndicator()
-        let syncManager = ContactSynchronizer(persistentContainer: coreDataManager.persistentContainer)
         syncManager.sync {
             print("syncontacts done")
             let contacts = self.coreDataManager.allContacts()
@@ -42,9 +43,24 @@ class ContactListPresenter {
         }
     }
     
-    func loadDetailContact(contactId:String) {
-        if let contact = coreDataManager.contactWithId(contactId) {
-            
+    func loadDetailContact(_ id:Int) {
+        if let contact = coreDataManager.contactWithId(id) {
+            self.contactView?.showLoadingIndicator()
+            if contact.createdAt == 0 {
+                // contact is not synced
+                // fetch detail
+                syncManager.syncDownloadSingleContactWithId(id, completion: { (c) in
+                    self.contactView?.hideLoadingIndicator()
+                    self.contactView?.showDetailContact(contact: c)
+                })
+            }
+            else {
+                self.contactView?.hideLoadingIndicator()
+                self.contactView?.showDetailContact(contact: contact)
+            }
+        }
+        else {
+            // Show Error here
         }
     }
 }

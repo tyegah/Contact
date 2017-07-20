@@ -56,44 +56,22 @@ struct ContactSynchronizer {
                         contacts.append(contact)
                     }
                     self.coreDataManager.saveContext()
+                    
+                    dicts.forEach { dict in
+                        // check if server data is newer than local
+                        let id = (dict["id"] as? NSNumber)?.intValue ?? 0
+                        APIManager.shared.fetchContactDetailWithId(id, completion: { (jsonDict) in
+                            let localContact = self.coreDataManager.contactWithId(id)
+                            if let json = jsonDict, let _ = localContact {
+                                if (json["first_name"] as! String) == "arshad" {
+                                    print(json)
+                                }
+                                localContact?.configureWithJSONDictionary(json, isUpdate: true)
+                            }
+                        })
+                        self.coreDataManager.saveContext()
+                    }
                 }
-                
-                
-//                dicts.forEach { dict in
-//                    // check if server data is newer than local
-//                    APIManager.shared.fetchContactDetailWithId((dict["id"] as? Int) ?? 0, completion: { (jsonDict) in
-//                        let localContact = self.coreDataManager.contactWithId((dict["id"] as? String) ?? "0")
-//                        if let json = jsonDict, let local = localContact {
-//                            // First compare the last update value
-//                            var needsUpdate = false
-//                            let localLastUpdate = localContact?.updatedAt as Date?
-//                            if localLastUpdate == nil {
-//                                // update local
-//                                needsUpdate = true
-//                            }
-//                            let todayDate = Date()
-//                            let serverLastUpdate = (json["updated_at"] as? String)?.convertToDate() ?? todayDate
-//                            let localDate = localLastUpdate as Date? ?? todayDate
-//                            if serverLastUpdate.timeIntervalSince1970 > localDate.timeIntervalSince1970 {
-//                                // Update local
-//                                needsUpdate = true
-//                            }
-//                            
-//                            if needsUpdate {
-//                                local.isFavorite = (dict["favorite"] as? NSNumber)?.boolValue ?? false
-//                                local.firstName = dict["first_name"] as? String
-//                                local.lastName = dict["last_name"] as? String
-//                                local.url = dict["url"] as? String
-//                                local.profilePic = dict["profile_pic"] as? String
-//                                local.phoneNumber = dict["phone_number"] as? String
-//                                local.email = dict["email"] as? String
-//                                local.createdAt = (dict["created_at"] as? String)?.convertToDate("yyyy-MM-ddThh:mm:ssZ") as NSDate?
-//                                local.updatedAt = (dict["updated_at"] as? String)?.convertToDate("yyyy-MM-ddThh:mm:ssZ") as NSDate?
-//                            }
-//                            self.coreDataManager.saveContext()
-//                        }
-//                    })
-//                }
             }
             completionBlock()
             return
@@ -152,6 +130,18 @@ struct ContactSynchronizer {
             DispatchQueue.main.async {
                 completionBlock()
             }
+        }
+    }
+    
+    func syncDownloadSingleContactWithId(_ id:Int, completion: @escaping (Contact?) -> Void) {
+        let localContact = self.coreDataManager.contactWithId(id)
+        ContactManagerDetailRequest(id: id).performFetch { (json) in
+            if let dict = json, let contact = localContact {
+                contact.configureWithJSONDictionary(dict, isUpdate: true)
+            }
+            self.coreDataManager.saveContext()
+            // return newly synced data
+            completion(self.coreDataManager.contactWithId(id))
         }
     }
     

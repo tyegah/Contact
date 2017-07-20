@@ -31,7 +31,7 @@ class APIManager {
     func fetchContacts(completion: @escaping FetchContactsCompletion) {
         if reachability.isReachable {
             networking.get(pathURL: "contacts.json") { (response) in
-//                print(response.responseJSON ?? ["":""])
+                print(response.responseJSON ?? ["":""])
                 if let json = response.responseJSON as? [[String:Any]] {
                     completion(json)
                     return
@@ -47,7 +47,7 @@ class APIManager {
     func fetchContactDetailWithId(_ id:Int, completion: @escaping FetchContactDetailCompletion) {
         if reachability.isReachable {
             networking.get(pathURL: "contacts/\(id).json", completion: { (response) in
-                print("Contact Detail response \(String(describing: response.responseJSON))")
+//                print("Contact Detail response \(String(describing: response.responseJSON))")
                 if let json = response.responseJSON as? [String:Any] {
                     completion(json)
                     return
@@ -115,6 +115,32 @@ class APIManager {
     }
 }
 
+class ContactManagerDetailRequest {
+    var id:Int
+    var networking:Networking
+    let reachability = Reachability()!
+    required init(id:Int) {
+        self.id = id
+        networking = Networking(baseURL: Config.baseURL)
+    }
+    
+    func performFetch(with completion:@escaping FetchContactDetailCompletion) {
+        if reachability.isReachable {
+            networking.get(pathURL: "contacts/\(self.id).json", completion: { (response) in
+                if let json = response.responseJSON as? [String:Any] {
+                    completion(json)
+                    return
+                }
+                else {
+                    completion(nil)
+                }
+            })
+        }
+        else {
+            completion(nil)
+        }
+    }
+}
 
 class ContactManagerAddRequest {
     var contact:Contact
