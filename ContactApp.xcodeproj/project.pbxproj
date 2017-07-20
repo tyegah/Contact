@@ -17,6 +17,7 @@
 		103046621F1DE98A003745B6 /* ContactDetailViewProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103046611F1DE98A003745B6 /* ContactDetailViewProtocol.swift */; };
 		103046641F1DE99B003745B6 /* ContactAddEditProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103046631F1DE99B003745B6 /* ContactAddEditProtocol.swift */; };
 		103046661F1DE9A8003745B6 /* ContactBaseProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103046651F1DE9A8003745B6 /* ContactBaseProtocol.swift */; };
+		109D66B31F210753001DC3CE /* KSToastView.m in Sources */ = {isa = PBXBuildFile; fileRef = 109D66B21F210753001DC3CE /* KSToastView.m */; };
 		109EB8AF1F1D0E49001E2FB3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109EB8AE1F1D0E49001E2FB3 /* AppDelegate.swift */; };
 		109EB8B71F1D0E49001E2FB3 /* ContactApp.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 109EB8B51F1D0E49001E2FB3 /* ContactApp.xcdatamodeld */; };
 		109EB8B91F1D0E49001E2FB3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 109EB8B81F1D0E49001E2FB3 /* Assets.xcassets */; };
@@ -64,6 +65,9 @@
 		103046611F1DE98A003745B6 /* ContactDetailViewProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactDetailViewProtocol.swift; sourceTree = "<group>"; };
 		103046631F1DE99B003745B6 /* ContactAddEditProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactAddEditProtocol.swift; sourceTree = "<group>"; };
 		103046651F1DE9A8003745B6 /* ContactBaseProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactBaseProtocol.swift; sourceTree = "<group>"; };
+		109D66B11F210753001DC3CE /* KSToastView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSToastView.h; sourceTree = "<group>"; };
+		109D66B21F210753001DC3CE /* KSToastView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSToastView.m; sourceTree = "<group>"; };
+		109D66B41F21077D001DC3CE /* ContactApp-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ContactApp-Bridging-Header.h"; path = "ContactApp/ContactApp-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
 		109EB8AB1F1D0E49001E2FB3 /* ContactApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ContactApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		109EB8AE1F1D0E49001E2FB3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = ../AppDelegate.swift; sourceTree = "<group>"; };
 		109EB8B61F1D0E49001E2FB3 /* ContactApp.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ContactApp.xcdatamodel; sourceTree = "<group>"; };
@@ -114,6 +118,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		109D66B01F210753001DC3CE /* KSToastView */ = {
+			isa = PBXGroup;
+			children = (
+				109D66B11F210753001DC3CE /* KSToastView.h */,
+				109D66B21F210753001DC3CE /* KSToastView.m */,
+			);
+			path = KSToastView;
+			sourceTree = "<group>";
+		};
 		109EB8A21F1D0E49001E2FB3 = {
 			isa = PBXGroup;
 			children = (
@@ -174,6 +187,7 @@
 				109EB8B81F1D0E49001E2FB3 /* Assets.xcassets */,
 				109EB8BA1F1D0E49001E2FB3 /* LaunchScreen.storyboard */,
 				109EB8BD1F1D0E49001E2FB3 /* Info.plist */,
+				109D66B41F21077D001DC3CE /* ContactApp-Bridging-Header.h */,
 			);
 			path = "Supporting Files";
 			sourceTree = "<group>";
@@ -249,6 +263,7 @@
 		109EB8EC1F1D109C001E2FB3 /* Library */ = {
 			isa = PBXGroup;
 			children = (
+				109D66B01F210753001DC3CE /* KSToastView */,
 				109EB8F01F1D1112001E2FB3 /* CachedImageView.swift */,
 				109EB8F11F1D1112001E2FB3 /* DiscardableImageCacheItem.swift */,
 			);
@@ -421,6 +436,7 @@
 				103046561F1DE0BF003745B6 /* ContactDetailController.swift in Sources */,
 				103046621F1DE98A003745B6 /* ContactDetailViewProtocol.swift in Sources */,
 				103046661F1DE9A8003745B6 /* ContactBaseProtocol.swift in Sources */,
+				109D66B31F210753001DC3CE /* KSToastView.m in Sources */,
 				109EB8B71F1D0E49001E2FB3 /* ContactApp.xcdatamodeld in Sources */,
 				109EB8F31F1D1112001E2FB3 /* DiscardableImageCacheItem.swift in Sources */,
 				109EB8EF1F1D10F2001E2FB3 /* Networking.swift in Sources */,
@@ -592,6 +608,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tyegah.ContactApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "ContactApp/ContactApp-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -606,6 +623,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tyegah.ContactApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "ContactApp/ContactApp-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
