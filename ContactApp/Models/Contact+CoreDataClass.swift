@@ -30,6 +30,9 @@ public class Contact: NSManagedObject {
         phoneNumber = jsonDict["phone_number"] as? String
         email = jsonDict["email"] as? String
         if let createdDate = (jsonDict["created_at"] as? String)?.convertServerTimeToDate() {
+            if (jsonDict["first_name"] as? String ?? "") == "Ty" {
+                print("created date \(createdDate), device date \(Date())")
+            }
             createdAt = Int64(createdDate.timeIntervalSince1970)
         }
         else {
@@ -42,18 +45,41 @@ public class Contact: NSManagedObject {
         else {
             updatedAt = 0
         }
-        
-        print("createdat \(createdAt)")
     }
     
     class func toJSONDictionary(contact:Contact?) -> [String:Any]? {
         if let c = contact {
-            var keys:[String] = c.entity.attributesByName.keys.map { $0 }
-            keys = keys.filter { $0 != "uuid"}
-            print("keys \(keys)")
-            return self.dictionaryWithValues(forKeys: keys)
+            var dict = [String:Any]()
+            dict["id"] = NSNumber(value:c.id)
+            dict["email"] = c.email ?? ""
+            dict["first_name"] = c.firstName ?? ""
+            dict["last_name"] = c.lastName ?? ""
+            dict["profile_pic"] = c.profilePic ?? ""
+            dict["url"] = c.url ?? ""
+            dict["favorite"] = NSNumber(value:c.isFavorite)
+            dict["created_at"] = Date(timeIntervalSince1970: Double(c.createdAt)).toUTCStringDate() ?? ""
+            dict["updated_at"] = Date(timeIntervalSince1970: Double(c.updatedAt)).toUTCStringDate() ?? ""
+            print("json \(dict)")
+            return dict
         }
         return nil
+    }
+}
+
+import UIKit
+extension Date {
+    func toUTCStringDate() -> String? {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let dateFormatter:DateFormatter
+        if appDelegate.dateFormatter == nil {
+            appDelegate.dateFormatter = DateFormatter()
+        }
+        
+        dateFormatter = appDelegate.dateFormatter!
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX") // set locale to reliable US_POSIX
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSZ"
+        
+        return dateFormatter.string(from: self)
     }
 }
 

@@ -63,9 +63,6 @@ struct ContactSynchronizer {
                         APIManager.shared.fetchContactDetailWithId(id, completion: { (jsonDict) in
                             let localContact = self.coreDataManager.contactWithId(id)
                             if let json = jsonDict, let _ = localContact {
-                                if (json["first_name"] as! String) == "arshad" {
-                                    print(json)
-                                }
                                 localContact?.configureWithJSONDictionary(json, isUpdate: true)
                             }
                         })
@@ -92,11 +89,11 @@ struct ContactSynchronizer {
                     // select uploaded contact from local db
                     if let localContact = self.coreDataManager.persistentContainer.viewContext.object(with: request.contact.objectID) as? Contact {
                         // assign id from server
-                        localContact.id = dict["id"] as? Int32 ?? 0
-                        if let updatedDate = (dict["updated_at"] as? String)?.convertServerTimeToDate() {
-                            localContact.updatedAt = Int64(updatedDate.timeIntervalSince1970)
-                            print("server update time \(updatedDate)")
-                        }
+                        localContact.id = (dict["id"] as? NSNumber)?.int32Value ?? 0
+//                        if let updatedDate = (dict["updated_at"] as? String)?.convertServerTimeToDate() {
+//                            localContact.updatedAt = Int64(updatedDate.timeIntervalSince1970)
+//                            print("server update time \(updatedDate)")
+//                        }
 
                         self.coreDataManager.saveContext()
                     }
@@ -157,11 +154,3 @@ struct ContactSynchronizer {
     }
 }
 
-//extension Date {
-//    
-//}
-
-
-//extension Date {
-//    
-//}

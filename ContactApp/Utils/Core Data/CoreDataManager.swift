@@ -44,6 +44,40 @@ class CoreDataManager {
         return nil
     }
     
+    func contactWithUniqueId(_ uuid:String) -> Contact? {
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Contact")
+        fetchRequest.predicate = NSPredicate(format: "uuid = %@",uuid)
+        do {
+            let contacts = try self.persistentContainer.viewContext.fetch(fetchRequest) as? [Contact]
+            if let count = contacts?.count, count > 0 {
+                return contacts?[0]
+            }
+        }
+        catch {
+            print("failed fetching contact with id \(uuid)")
+        }
+        
+        return nil
+    }
+    
+    func addNewContact(_ firstName:String?, lastName:String?, phoneNumber:String?, email:String?, profilePicture:String? = "") -> Contact? {
+        let contact = Contact(context: persistentContainer.viewContext)
+        contact.id = 0
+        contact.firstName = firstName
+        contact.lastName = lastName
+        contact.phoneNumber = phoneNumber
+        contact.email = email
+        contact.createdAt = Int64(Date().timeIntervalSince1970)
+        contact.updatedAt = Int64(Date().timeIntervalSince1970)
+        contact.url = ""
+        contact.isFavorite = false
+        contact.profilePic = profilePicture
+        let uuid = NSUUID().uuidString
+        contact.uuid = uuid
+        self.saveContext()
+        return contactWithUniqueId(uuid)
+    }
+    
     // contacts that aren't available on server
     func unsyncedContacts() -> [Contact] {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Contact")

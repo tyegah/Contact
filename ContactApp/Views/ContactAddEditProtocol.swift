@@ -7,3 +7,11 @@
 //
 
 import Foundation
+
+protocol ContactAddEditViewProtocol:ContactBaseProtocol {
+    // actions
+    func popView()
+    func reloadView()
+    func takePicture()
+    func saveContact()
+}

@@ -11,19 +11,17 @@ import UIKit
 
 extension String {
     func convertServerTimeToDate() -> Date? {
-        print("string time",self)
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let dateFormatter:DateFormatter
         if appDelegate.dateFormatter == nil {
             appDelegate.dateFormatter = DateFormatter()
         }
         dateFormatter = appDelegate.dateFormatter!
-        //        let tempLocale = dateFormatter.locale // save locale temporarily
         dateFormatter.locale = Locale(identifier: "en_US_POSIX") // set locale to reliable US_POSIX
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSZ"
+        dateFormatter.timeZone = NSTimeZone.local
 //        let date = dateFormatter.date(from: self)
-//        print("converted time \(date)")
-//        print("now date \(Date())")
+//        dateFormatter.
         return dateFormatter.date(from: self)
     }
 }

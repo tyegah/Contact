@@ -31,7 +31,7 @@ class APIManager {
     func fetchContacts(completion: @escaping FetchContactsCompletion) {
         if reachability.isReachable {
             networking.get(pathURL: "contacts.json") { (response) in
-                print(response.responseJSON ?? ["":""])
+//                print(response.responseJSON ?? ["":""])
                 if let json = response.responseJSON as? [[String:Any]] {
                     completion(json)
                     return
@@ -153,7 +153,8 @@ class ContactManagerAddRequest {
     
     func performAdd(with completion:@escaping AddNewContactCompletion) {
         if reachability.isReachable {
-            if let contactJSON = Contact.toJSONDictionary(contact: contact) as? [String:String]{
+            if let contactJSON = Contact.toJSONDictionary(contact: contact){
+                print("JSON \(contactJSON)")
                 networking.post(pathURL: "contacts.json", parameters: contactJSON, completion: { (response) in
                     if let json = response.responseJSON as? [String:Any] {
                         completion(json)

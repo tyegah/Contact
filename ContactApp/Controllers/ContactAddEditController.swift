@@ -13,19 +13,17 @@ class ContactAddEditController: UITableViewController, UINavigationControllerDel
     let tableFields = ["First Name", "Last Name", "mobile", "email"]
     var contact:Contact? {
         didSet {
-            if let _ = contact {
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            }
+            contactPresenter.reloadView()
         }
     }
+    
+    let contactPresenter = ContactAddEditPresenter(coreDataManager: CoreDataManager(persistentContainer: (UIApplication.shared.delegate as! AppDelegate).persistentContainer))
     
     var imagePickerController:UIImagePickerController?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupViewLayout()
+        contactPresenter.attachView(view: self)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -34,50 +32,6 @@ class ContactAddEditController: UITableViewController, UINavigationControllerDel
         if let v = self.view.viewWithTag(1) {
             v.becomeFirstResponder()
         }
-    }
-    
-    override func setupViewLayout() {
-        self.navigationItem.hidesBackButton = true
-        let cancelBarButton = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(popViewController))
-        let saveBarButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(saveContact))
-        self.navigationItem.leftBarButtonItem = cancelBarButton
-        self.navigationItem.rightBarButtonItem = saveBarButton
-        tableView.register(AddEditCell.self, forCellReuseIdentifier: cellId)
-        tableView.separatorColor = UIColor.clear
-        tableView.tableFooterView = UIView()
-        tableView.sectionIndexBackgroundColor = Color.backgroundColor
-        imagePickerController = UIImagePickerController()
-    }
-    
-    //actions
-    func saveContact() {
-        if let _ = self.contact {
-            // Update contact
-        }
-        else {
-            // Add new contact
-            var firstName = ""
-            var lastName = ""
-            var phoneNumber = ""
-            var emailAddress = ""
-            if let firstNameTextfield = self.view.viewWithTag(1) as? UITextField, let lastNameTextfield = self.view.viewWithTag(2) as? UITextField, let phoneTextfield = self.view.viewWithTag(3) as? UITextField, let emailTextfield = self.view.viewWithTag(4) as? UITextField {
-                firstName = firstNameTextfield.text!
-                lastName = lastNameTextfield.text!
-                emailAddress = emailTextfield.text!
-                phoneNumber = phoneTextfield.text!
-                
-//                let contact = Contact(context: <#T##NSManagedObjectContext#>)
-            }
-            
-        }
-    }
-    
-    func openImagePicker() {
-        self.popupAlert(title: "", message: "Choose Action",style:.actionSheet, actionTitles: ["Open Gallery", "Open Camera","Cancel"], actions: [{action1 in
-            self.openGallery()
-        },{action2 in
-            self.openCamera()
-        },nil])
     }
     
     func openGallery()
@@ -100,12 +54,61 @@ class ContactAddEditController: UITableViewController, UINavigationControllerDel
         }
     }
     
-    func popViewController() {
-        self.dismiss(animated: true, completion: nil)
-    }
-    
     func dismissKeyBoardOnTap() {
         self.view.endEditing(true)
+    }
+}
+
+extension ContactAddEditController:ContactAddEditViewProtocol {
+    override func setupViewLayout() {
+        self.navigationItem.hidesBackButton = true
+        let cancelBarButton = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(popView))
+        let saveBarButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(saveContact))
+        self.navigationItem.leftBarButtonItem = cancelBarButton
+        self.navigationItem.rightBarButtonItem = saveBarButton
+        tableView.register(AddEditCell.self, forCellReuseIdentifier: cellId)
+        tableView.separatorColor = UIColor.clear
+        tableView.tableFooterView = UIView()
+        tableView.sectionIndexBackgroundColor = Color.backgroundColor
+        imagePickerController = UIImagePickerController()
+    }
+    
+    func reloadView() {
+        tableView.reloadData()
+    }
+    
+    //actions
+    func saveContact() {
+        var firstName = ""
+        var lastName = ""
+        var phoneNumber = ""
+        var emailAddress = ""
+        if let firstNameTextfield = self.view.viewWithTag(1) as? UITextField, let lastNameTextfield = self.view.viewWithTag(2) as? UITextField, let phoneTextfield = self.view.viewWithTag(3) as? UITextField, let emailTextfield = self.view.viewWithTag(4) as? UITextField {
+            firstName = firstNameTextfield.text!
+            lastName = lastNameTextfield.text!
+            emailAddress = emailTextfield.text!
+            phoneNumber = phoneTextfield.text!
+        if let _ = self.contact {
+            // Update contact
+            contactPresenter.saveContact(id: Int(contact!.id),firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, email: emailAddress)
+        }
+        else {
+            // Add new contact
+                contactPresenter.saveContact(id: 0,firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, email: emailAddress)
+            }
+        }
+    }
+    
+    func takePicture() {
+        self.popupAlert(title: "", message: "Choose Action",style:.actionSheet, actionTitles: ["Open Gallery", "Open Camera","Cancel"], actions: [{action1 in
+            self.openGallery()
+            },{action2 in
+                self.openCamera()
+            },nil])
+    }
+    
+    func popView() {
+        self.dismiss(animated: true, completion: nil)
     }
 }
 
@@ -159,7 +162,7 @@ extension ContactAddEditController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyBoardOnTap))
         headerView.addGestureRecognizer(tapGesture)
         headerView.cameraImgView.isUserInteractionEnabled = true
-        let addImageTap = UITapGestureRecognizer(target: self, action: #selector(openImagePicker))
+        let addImageTap = UITapGestureRecognizer(target: self, action: #selector(takePicture))
         headerView.cameraImgView.addGestureRecognizer(addImageTap)
         return headerView
     }
