@@ -36,7 +36,6 @@ struct ContactSynchronizer {
             
             // block syncQueue until latest sync request finished
             syncGroup.wait(timeout: DispatchTime.distantFuture)
-//            print("test")
         }
     }
     
@@ -69,47 +68,6 @@ struct ContactSynchronizer {
                     }
                 }
             }
-//            self.coreDataManager.persistentContainer.performBackgroundTask({ (context) in
-//                if let dicts = jsonDict {
-//                    print("dict \(dicts)")
-//                    var contacts = [Contact]()
-//                    let localContacts = self.coreDataManager.allContacts()
-//                    // if contacts are still empty, insert into coredata
-//                    if localContacts.count == 0 {
-//                        dicts.forEach { dict in
-//                            let contact = Contact(context: self.persistentContainer.viewContext)
-//                            contact.configureWithJSONDictionary(dict)
-//                            contacts.append(contact)
-//                        }
-//                        
-//                        print("download sync is main thread \(Thread.isMainThread)")
-//                        do {
-//                            try context.save()
-//                        }
-//                        catch {
-//                            print("error saving")
-//                        }
-//                        
-//                        dicts.forEach { dict in
-//                            // check if server data is newer than local
-//                            let id = (dict["id"] as? NSNumber)?.intValue ?? 0
-//                            APIManager.shared.fetchContactDetailWithId(id, completion: { (jsonDict) in
-//                                let localContact = self.coreDataManager.contactWithId(id)
-//                                if let json = jsonDict, let _ = localContact {
-//                                    localContact?.configureWithJSONDictionary(json, isUpdate: true)
-//                                }
-//                            })
-//                            do {
-//                                try context.save()
-//                            }
-//                            catch {
-//                                print("error saving detail")
-//                            }
-//                        }
-//                    }
-//                }
-//            })
-
             completionBlock()
             return
         }
@@ -122,7 +80,6 @@ struct ContactSynchronizer {
         let uploadGroup = DispatchGroup()
         
         for request in createContactRequests {
-            print("UPLOAD SYNCING")
             uploadGroup.enter()
             request.performAdd(with: { (jsonDict) in
                 if let dict = jsonDict {

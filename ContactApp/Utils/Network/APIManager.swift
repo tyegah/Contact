@@ -24,7 +24,6 @@ class APIManager {
     func fetchContacts(completion: @escaping FetchContactsCompletion) {
         if ReachabilityManager.shared.isNetworkAvailable {
             networking.get(pathURL: "contacts.json") { (response) in
-//                print(response.responseJSON ?? ["":""])
                 if let json = response.responseJSON as? [[String:Any]] {
                     completion(json)
                     return
@@ -40,7 +39,6 @@ class APIManager {
     func fetchContactDetailWithId(_ id:Int, completion: @escaping FetchContactDetailCompletion) {
         if ReachabilityManager.shared.isNetworkAvailable {
             networking.get(pathURL: "contacts/\(id).json", completion: { (response) in
-//                print("Contact Detail response \(String(describing: response.responseJSON))")
                 if let json = response.responseJSON as? [String:Any] {
                     completion(json)
                     return
@@ -53,51 +51,6 @@ class APIManager {
             completion(nil)
         }
     }
-    
-//    func addNewContact(_ contact:Contact, completion: @escaping AddNewContactCompletion) {
-//        if ReachabilityManager.shared.isNetworkAvailable {
-//            if let contactJSON = Contact.toJSONDictionary(contact: contact) as? [String:String]{
-//                networking.post(pathURL: "contacts.json", parameters: contactJSON, completion: { (response) in
-//                    if let json = response.responseJSON as? [String:Any] {
-//                        completion(json)
-//                        return
-//                    }
-//                    else {
-//                        completion(nil)
-//                    }
-//                })
-//            }
-//            else {
-//                completion(nil)
-//            }
-//        }
-//        else {
-//            completion(nil)
-//        }
-//    }
-//    
-//    func updateContact(_ contact:Contact, completion: @escaping UpdateContactCompletion) {
-//        if ReachabilityManager.shared.isNetworkAvailable {
-//            if let dict = Contact.toJSONDictionary(contact: contact) {
-//                networking.put(pathURL: "contacts/\(contact.id).json", parameters: dict, completion: { (response) in
-//                    if let json = response.responseJSON as? [String:Any] {
-//                        completion(json)
-//                        return
-//                    }
-//                    else {
-//                        completion(nil)
-//                    }
-//                })
-//            }
-//            else {
-//                completion(nil)
-//            }
-//        }
-//        else {
-//            completion(nil)
-//        }
-//    }
-    
     
     func createAddContactRequest(_ contact: Contact) -> ContactManagerAddRequest {
         return ContactManagerAddRequest(contact: contact)
@@ -145,7 +98,6 @@ class ContactManagerAddRequest {
     func performAdd(with completion:@escaping AddNewContactCompletion) {
         if ReachabilityManager.shared.isNetworkAvailable {
             if let contactJSON = Contact.toJSONDictionary(contact: contact){
-                print("JSON \(contactJSON)")
                 networking.post(pathURL: "contacts.json", parameters: contactJSON, completion: { (response) in
                     if let json = response.responseJSON as? [String:Any] {
                         completion(json)

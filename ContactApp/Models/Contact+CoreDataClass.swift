@@ -30,9 +30,6 @@ public class Contact: NSManagedObject {
         phoneNumber = jsonDict["phone_number"] as? String
         email = jsonDict["email"] as? String
         if let createdDate = (jsonDict["created_at"] as? String)?.convertServerTimeToDate() {
-            if (jsonDict["first_name"] as? String ?? "") == "Ty" {
-                print("created date \(createdDate), device date \(Date())")
-            }
             createdAt = Int64(createdDate.timeIntervalSince1970)
         }
         else {
@@ -59,7 +56,6 @@ public class Contact: NSManagedObject {
             dict["favorite"] = NSNumber(value:c.isFavorite)
             dict["created_at"] = Date(timeIntervalSince1970: Double(c.createdAt)).toUTCStringDate() ?? ""
             dict["updated_at"] = Date(timeIntervalSince1970: Double(c.updatedAt)).toUTCStringDate() ?? ""
-            print("json \(dict)")
             return dict
         }
         return nil

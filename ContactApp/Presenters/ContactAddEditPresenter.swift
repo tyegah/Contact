@@ -35,8 +35,7 @@ class ContactAddEditPresenter {
     
     func saveContact(id:Int, firstName:String?, lastName:String?, phoneNumber:String?, email:String?) {
         if id == 0 {
-            let contact = coreDataManager.addNewContact(firstName, lastName: lastName, phoneNumber: phoneNumber, email: email)
-            print("contact", contact?.firstName ?? "")
+            coreDataManager.addNewContact(firstName, lastName: lastName, phoneNumber: phoneNumber, email: email)
         }
         else {
             coreDataManager.updateContactWithId(id, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, email: email)

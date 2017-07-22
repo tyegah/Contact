@@ -60,7 +60,7 @@ class CoreDataManager {
         return nil
     }
     
-    func addNewContact(_ firstName:String?, lastName:String?, phoneNumber:String?, email:String?, profilePicture:String? = "") -> Contact? {
+    func addNewContact(_ firstName:String?, lastName:String?, phoneNumber:String?, email:String?, profilePicture:String? = "") {
         let contact = Contact(context: persistentContainer.viewContext)
         contact.id = 0
         contact.firstName = firstName ?? ""
@@ -75,7 +75,6 @@ class CoreDataManager {
         let uuid = NSUUID().uuidString
         contact.uuid = uuid
         self.saveContext()
-        return contactWithUniqueId(uuid)
     }
     
     func updateContactWithId(_ id:Int, firstName:String?, lastName:String?, phoneNumber:String?, email:String?, profilePicture:String? = "") {

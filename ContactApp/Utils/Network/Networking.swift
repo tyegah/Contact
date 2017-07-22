@@ -65,7 +65,6 @@ extension URLRequest {
             theURL = url
         }
         
-        //        URLRequest
         var request = URLRequest(url: theURL)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
