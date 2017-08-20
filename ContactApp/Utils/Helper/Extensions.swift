@@ -54,9 +54,10 @@ extension UIViewController {
     }
 }
 
-extension UIViewController:ContactBaseProtocol {
+extension UITableViewController:ContactBaseProtocol {
     var activityIndicator:UIActivityIndicatorView {
         let ai = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        ai.isHidden = false
         ai.hidesWhenStopped = true
         ai.center = self.view.center
         return ai
@@ -67,16 +68,22 @@ extension UIViewController:ContactBaseProtocol {
     }
     
     func showLoadingIndicator() {
-        self.view.addSubview(self.activityIndicator)
-        self.view.bringSubview(toFront: self.activityIndicator)
-        self.activityIndicator.isHidden = false
-        self.activityIndicator.startAnimating()
+        let ai = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        ai.tag = 777
+        ai.isHidden = false
+        ai.hidesWhenStopped = true
+        ai.center = self.tableView.center
+        self.tableView.addSubview(ai)
+        self.tableView.bringSubview(toFront: ai)
+        ai.startAnimating()
     }
     
     func hideLoadingIndicator() {
-        self.activityIndicator.stopAnimating()
-        self.activityIndicator.isHidden = true
-        self.activityIndicator.removeFromSuperview()
+        if let ai = self.view.viewWithTag(777) as? UIActivityIndicatorView {
+            ai.stopAnimating()
+            ai.isHidden = true
+            ai.removeFromSuperview()
+        }
     }
 }
 

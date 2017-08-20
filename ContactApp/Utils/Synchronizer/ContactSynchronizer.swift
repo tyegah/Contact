@@ -68,6 +68,7 @@ struct ContactSynchronizer {
                     }
                 }
             }
+            print("completion block called")
             completionBlock()
             return
         }
@@ -78,7 +79,6 @@ struct ContactSynchronizer {
     func uploadSync(_ completionBlock: @escaping () -> ()) {
         let (createContactRequests, updateContactRequests) = generateUploadRequests()
         let uploadGroup = DispatchGroup()
-        
         for request in createContactRequests {
             uploadGroup.enter()
             request.performAdd(with: { (jsonDict) in
@@ -101,7 +101,6 @@ struct ContactSynchronizer {
                 uploadGroup.leave()
             })
         }
-        
         for request in updateContactRequests {
             uploadGroup.enter()
             request.performUpdate(with: { (jsonDict) in
@@ -125,7 +124,6 @@ struct ContactSynchronizer {
                 uploadGroup.leave()
             })
         }
-        
         DispatchQueue.global(qos: .default).async {
             uploadGroup.wait(timeout: DispatchTime.distantFuture)
             

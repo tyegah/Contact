@@ -24,6 +24,7 @@ class APIManager {
     func fetchContacts(completion: @escaping FetchContactsCompletion) {
         if ReachabilityManager.shared.isNetworkAvailable {
             networking.get(pathURL: "contacts.json") { (response) in
+                print("response \(response.responseJSON)")
                 if let json = response.responseJSON as? [[String:Any]] {
                     completion(json)
                     return
@@ -177,6 +178,7 @@ class ReachabilityManager: NSObject {
         case .reachableViaWWAN:
             debugPrint("Network reachable through Cellular Data")
         }
+        reachabilityStatus = reachability.currentReachabilityStatus
     }
     
     

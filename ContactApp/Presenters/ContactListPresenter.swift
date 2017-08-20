@@ -30,6 +30,7 @@ class ContactListPresenter {
     func loadContacts() {
         self.contactView?.showLoadingIndicator()
         syncManager.sync {
+            print("contact sync callback called")
             let contacts = self.coreDataManager.allContacts()
             self.contactView?.hideLoadingIndicator()
             if contacts.count == 0 {
