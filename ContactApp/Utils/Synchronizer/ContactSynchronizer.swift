@@ -65,12 +65,14 @@ struct ContactSynchronizer {
                             })
                             self.coreDataManager.saveContext()
                         }
+                        completionBlock()
+                    }
+                    else {
+                        completionBlock()
                     }
                 }
+                return
             }
-            print("completion block called")
-            completionBlock()
-            return
         }
     }
     

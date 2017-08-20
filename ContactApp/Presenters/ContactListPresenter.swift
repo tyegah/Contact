@@ -29,16 +29,22 @@ class ContactListPresenter {
     
     func loadContacts() {
         self.contactView?.showLoadingIndicator()
-        syncManager.sync {
-            print("contact sync callback called")
-            let contacts = self.coreDataManager.allContacts()
-            self.contactView?.hideLoadingIndicator()
-            if contacts.count == 0 {
-                self.contactView?.setEmptyUsers()
-            }
-            else {
-                self.contactView?.loadContacts(contacts: contacts)
-            }
+        // Load the local contacts
+        getContacts()
+        syncManager.sync { [weak self] in
+            // Reload contacts after sync
+            self?.getContacts()
+        }
+    }
+    
+    func getContacts() {
+        let contacts = self.coreDataManager.allContacts()
+        self.contactView?.hideLoadingIndicator()
+        if contacts.count == 0 {
+            self.contactView?.setEmptyUsers()
+        }
+        else {
+            self.contactView?.loadContacts(contacts: contacts)
         }
     }
     
