@@ -33,7 +33,7 @@ class ContactDetailPresenter {
             contact.updatedAt = Int64(Date().timeIntervalSince1970)
             coreDataManager.saveContext()
             self.contactView?.reloadView(contact:contact)
-            syncManager.uploadSync {
+            syncManager.sync {
                 
             }
         }

@@ -41,7 +41,7 @@ class ContactAddEditPresenter {
             coreDataManager.updateContactWithId(id, firstName: firstName, lastName: lastName, phoneNumber: phoneNumber, email: email)
         }
         
-        syncManager.uploadSync {
+        syncManager.sync {
             
         }
         
